@@ -29,6 +29,9 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^8.1.0",
     "@prisma/client": "^6.1.0",
+    "argon2": "^0.41.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
@@ -69,12 +72,21 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@prisma/__generated__$": "<rootDir>/../prisma/__generated__",
+      "^@prisma/__generated__/(.*)$": "<rootDir>/../prisma/__generated__/$1"
+    },
     "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "\\.module\\.ts$",
+      "main\\.ts$"
+    ],
     "testEnvironment": "node"
   }
 }
