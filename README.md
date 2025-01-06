@@ -93,4 +93,4 @@ Build application and start.
 
 ## License
 
-Project ecommerce-backend is distributed under the MIT license.
+Project planner-backend is distributed under the MIT license.
