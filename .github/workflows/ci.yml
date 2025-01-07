@@ -12,12 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm install
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install Dependencies with pnpm
+        run: pnpm install
 
   format:
     name: Format
@@ -25,11 +23,8 @@ jobs:
     needs: install
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - run: npm run format:check
+      - name: Run Format Check
+        run: pnpm run format:check
 
   lint:
     name: Lint
@@ -37,11 +32,8 @@ jobs:
     needs: install
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - run: npm run lint
+      - name: Run Linting
+        run: pnpm run lint
 
   build:
     name: Build
@@ -49,11 +41,8 @@ jobs:
     needs: install
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - run: npm run build
+      - name: Build Project
+        run: pnpm run build
 
   test:
     name: Test
@@ -61,11 +50,8 @@ jobs:
     needs: install
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - run: npm run test
+      - name: Run Tests
+        run: pnpm run test
 
   check-for-errors:
     name: Check for Errors
