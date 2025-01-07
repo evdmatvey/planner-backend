@@ -6,4 +6,5 @@ export const AuthMessageConstants = {
   USER_ALREADY_EXIST: 'Такой пользователь уже есть в системе.',
   INCORRECT_CREDENTIALS: 'Неверный логин или пароль.',
   NOT_FOUND_REFRESH_TOKEN: '"Refresh token" не передан в запросе.',
+  NO_ACCESS: 'Нет доступа!',
 };
