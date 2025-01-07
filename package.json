@@ -90,6 +90,10 @@
     "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
       "\\.module\\.ts$",
+      "\\.strategy\\.ts$",
+      "\\.guard\\.ts$",
+      "\\.decorator\\.ts$",
+      "\\.config\\.ts$",
       "main\\.ts$",
       "index\\.ts$"
     ],
