@@ -1,6 +1,6 @@
 {
   "name": "planner-backend",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "description": "The server part of a planner web application",
   "author": "",
   "private": true,
@@ -90,6 +90,10 @@
     "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
       "\\.module\\.ts$",
+      "\\.strategy\\.ts$",
+      "\\.guard\\.ts$",
+      "\\.decorator\\.ts$",
+      "\\.config\\.ts$",
       "main\\.ts$",
       "index\\.ts$"
     ],
