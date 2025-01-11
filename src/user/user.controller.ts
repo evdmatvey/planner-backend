@@ -6,11 +6,21 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
 import { UserMessageConstants } from './constants/user-message.constants';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  UnauthorizedResponse,
+  UpdateUserOkResponse,
+  UserBadRequestResponse,
+} from './types/user-response.types';
 import { UserService } from './user.service';
 
 @Controller('user/profile')
@@ -20,8 +30,11 @@ export class UserController {
   @Put()
   @Auth()
   @HttpCode(200)
-  @UsePipes(new ValidationPipe())
   @ApiBearerAuth()
+  @UsePipes(new ValidationPipe())
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponse })
+  @ApiOkResponse({ type: UpdateUserOkResponse })
+  @ApiBadRequestResponse({ type: UserBadRequestResponse })
   public async update(
     @UseUser('id') userId: string,
     @Body() dto: UpdateUserDto,
