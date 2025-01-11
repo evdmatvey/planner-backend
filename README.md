@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Framework-nestjs-blue%3Fstyle%3Dflat" alt="Framework-nestjs"/>
-  <img src="https://img.shields.io/badge/Version-0.3.0_(Beta)-purple?style=flat" alt="Version-0.3.0(Beta)"/>
+  <img src="https://img.shields.io/badge/Version-0.3.1_(Beta)-purple?style=flat" alt="Version-0.3.1(Beta)"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="License-MIT"/>
 </p>
 
