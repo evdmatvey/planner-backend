@@ -6,6 +6,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
 import { UserMessageConstants } from './constants/user-message.constants';
@@ -20,6 +21,7 @@ export class UserController {
   @Auth()
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
+  @ApiBearerAuth()
   public async update(
     @UseUser('id') userId: string,
     @Body() dto: UpdateUserDto,
