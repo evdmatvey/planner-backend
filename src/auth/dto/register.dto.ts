@@ -8,7 +8,9 @@ export class RegisterDto extends LoginDto {
   @ApiProperty({ example: '123456' })
   @IsNotEmpty({ message: AuthValidationConstants.EMPTY_PASSWORD_REPEAT })
   @IsString({ message: AuthValidationConstants.IS_STRING_PASSWORD_REPEAT })
-  @MinLength(6, { message: AuthValidationConstants.MIN_LENGTH_PASSWORD_REPEAT })
+  @MinLength(AuthValidationConstants.MIN_PASSWORD, {
+    message: AuthValidationConstants.MIN_LENGTH_PASSWORD_REPEAT,
+  })
   @Validate(IsPasswordsMatchingConstraint, {
     message: AuthValidationConstants.INCORRECT_PASSWORD_REPEAT,
   })
