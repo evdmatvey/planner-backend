@@ -12,6 +12,8 @@ export class LoginDto {
   @ApiProperty({ example: '123456' })
   @IsNotEmpty({ message: AuthValidationConstants.EMPTY_PASSWORD })
   @IsString({ message: AuthValidationConstants.IS_STRING_PASSWORD })
-  @MinLength(6, { message: AuthValidationConstants.MIN_LENGTH_PASSWORD })
+  @MinLength(AuthValidationConstants.MIN_PASSWORD, {
+    message: AuthValidationConstants.MIN_LENGTH_PASSWORD,
+  })
   password: string;
 }
