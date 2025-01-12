@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Put,
   UsePipes,
@@ -20,17 +21,30 @@ import {
   UnauthorizedResponse,
   UpdateUserOkResponse,
   UserBadRequestResponse,
+  UserResponse,
 } from './types/user-response.types';
 import { UserService } from './user.service';
+import { removePasswordFromUser } from './utils/remove-password-from-user.util';
 
+@ApiBearerAuth()
 @Controller('user/profile')
 export class UserController {
   constructor(private readonly _userService: UserService) {}
 
+  @Get()
+  @Auth()
+  @HttpCode(200)
+  @ApiOkResponse({ type: UserResponse })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponse })
+  public async getProfile(@UseUser('id') userId: string) {
+    const user = await this._userService.getById(userId);
+
+    return removePasswordFromUser(user);
+  }
+
   @Put()
   @Auth()
   @HttpCode(200)
-  @ApiBearerAuth()
   @UsePipes(new ValidationPipe())
   @ApiUnauthorizedResponse({ type: UnauthorizedResponse })
   @ApiOkResponse({ type: UpdateUserOkResponse })

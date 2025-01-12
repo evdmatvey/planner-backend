@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { User } from '@prisma/__generated__';
 import * as argon2 from 'argon2';
 import { mockPrismaService } from '@/shared/mocks/prisma-service.mock';
 import { PrismaService } from '@/shared/services/prisma.service';
@@ -11,6 +12,8 @@ jest.mock('argon2');
 describe('UserService', () => {
   let service: UserService;
   let prismaService: typeof mockPrismaService;
+  let userId: string;
+  let user: User;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,118 +25,144 @@ describe('UserService', () => {
 
     service = module.get<UserService>(UserService);
     prismaService = module.get<typeof mockPrismaService>(PrismaService);
+    userId = 'user-id';
+    user = {
+      id: userId,
+      email: 'test@email.test',
+      password: 'password123',
+      name: 'name',
+      createdAt: new Date(0),
+      updatedAt: new Date(0),
+    };
   });
 
   describe('getByEmail', () => {
-    it('should return a user by email', async () => {
-      const email = 'test@example.com';
-      const user = { id: '1', email };
+    it('should call prisma findUnique with email', async () => {
+      await service.getByEmail(user.email);
 
-      prismaService.user.findUnique.mockResolvedValue(user);
-
-      const result = await service.getByEmail(email);
-
-      expect(result).toEqual(user);
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email },
+        where: { email: user.email },
       });
     });
 
-    it('should return null if user not found by email', async () => {
-      const email = 'notfound@example.com';
+    it('should return a user by email', async () => {
+      prismaService.user.findUnique.mockResolvedValue(user);
 
+      const result = await service.getByEmail(user.email);
+
+      expect(result).toEqual(user);
+    });
+
+    it('should return null if user not found by email', async () => {
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      const result = await service.getByEmail(email);
+      const result = await service.getByEmail(user.email);
 
       expect(result).toBeNull();
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email },
-      });
     });
   });
 
   describe('getById', () => {
-    it('should return a user by id', async () => {
-      const id = '1';
-      const user = { id, email: 'test@example.com' };
+    it('should call prisma findUnique with id', async () => {
+      await service.getById(userId);
 
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
+    });
+
+    it('should return a user by id', async () => {
       prismaService.user.findUnique.mockResolvedValue(user);
 
-      const result = await service.getById(id);
+      const result = await service.getById(userId);
 
       expect(result).toEqual(user);
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { id },
-      });
     });
 
     it('should return null if user not found by id', async () => {
-      const id = 'nonexistent-id';
-
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      const result = await service.getById(id);
+      const result = await service.getById(userId);
 
       expect(result).toBeNull();
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { id },
+    });
+  });
+
+  describe('create', () => {
+    let dto: CreateUserDto;
+    let hashedPassword: string;
+
+    beforeEach(() => {
+      dto = {
+        email: user.email,
+        password: user.password,
+      };
+
+      hashedPassword = 'hashedPassword';
+    });
+
+    it('should call hash with password from dto', async () => {
+      await service.create(dto);
+
+      expect(argon2.hash).toHaveBeenCalledWith(dto.password);
+    });
+
+    it('should call prisma create with correct data', async () => {
+      (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
+
+      await service.create(dto);
+
+      expect(prismaService.user.create).toHaveBeenCalledWith({
+        data: { ...dto, password: hashedPassword },
       });
     });
-  });
 
-  it('should update a user with a hashed password', async () => {
-    const userId = 'user-id';
-    const dto: UpdateUserDto = {
-      email: 'test@example.com',
-      password: 'password123',
-      name: 'name',
-    };
+    it('should create a user with a hashed password', async () => {
+      prismaService.user.create.mockResolvedValue(user);
 
-    const hashedPassword = 'hashedPassword';
-    (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
+      const result = await service.create(dto);
 
-    const updatedUser = {
-      id: userId,
-      ...dto,
-      password: hashedPassword,
-    };
-
-    prismaService.user.update.mockResolvedValue(updatedUser);
-
-    const result = await service.update(userId, dto);
-
-    expect(result).toEqual(updatedUser);
-    expect(argon2.hash).toHaveBeenCalledWith(dto.password);
-    expect(prismaService.user.update).toHaveBeenCalledWith({
-      where: { id: userId },
-      data: { ...dto, password: hashedPassword },
+      expect(result).toEqual(user);
     });
   });
 
-  it('should create a user with a hashed password', async () => {
-    const dto: CreateUserDto = {
-      email: 'test@example.com',
-      password: 'password123',
-    };
+  describe('update', () => {
+    let dto: UpdateUserDto;
+    let hashedPassword: string;
 
-    const hashedPassword = 'hashedPassword';
-    (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
+    beforeEach(() => {
+      dto = {
+        email: user.email,
+        password: user.password,
+        name: user.name,
+      };
 
-    const createdUser = {
-      id: '1',
-      ...dto,
-      password: hashedPassword,
-    };
+      hashedPassword = 'hashedPassword';
+    });
 
-    prismaService.user.create.mockResolvedValue(createdUser);
+    it('should call hash with password from dto', async () => {
+      await service.update(userId, dto);
 
-    const result = await service.create(dto);
+      expect(argon2.hash).toHaveBeenCalledWith(dto.password);
+    });
 
-    expect(result).toEqual(createdUser);
-    expect(argon2.hash).toHaveBeenCalledWith(dto.password);
-    expect(prismaService.user.create).toHaveBeenCalledWith({
-      data: { ...dto, password: hashedPassword },
+    it('should call prisma update with correct data', async () => {
+      (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
+
+      await service.update(userId, dto);
+
+      expect(prismaService.user.update).toHaveBeenCalledWith({
+        where: { id: userId },
+        data: { ...dto, password: hashedPassword },
+      });
+    });
+
+    it('should update a user with a hashed password', async () => {
+      prismaService.user.update.mockResolvedValue(user);
+
+      const result = await service.update(userId, dto);
+
+      expect(result).toEqual(user);
     });
   });
 });
