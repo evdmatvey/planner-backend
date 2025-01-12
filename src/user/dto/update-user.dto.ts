@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { UserValidationConstants } from '../constants/user-validation.constants';
 
 export class UpdateUserDto {
@@ -11,13 +17,14 @@ export class UpdateUserDto {
   })
   name: string;
 
+  @IsOptional()
   @ApiProperty({ example: '123456' })
   @IsNotEmpty({ message: UserValidationConstants.EMPTY_PASSWORD })
   @IsString({ message: UserValidationConstants.IS_STRING_PASSWORD })
   @MinLength(UserValidationConstants.MIN_PASSWORD, {
     message: UserValidationConstants.MIN_LENGTH_PASSWORD,
   })
-  password: string;
+  password?: string;
 
   @ApiProperty({ example: 'test@test.test' })
   @IsNotEmpty({ message: UserValidationConstants.EMPTY_EMAIL })
