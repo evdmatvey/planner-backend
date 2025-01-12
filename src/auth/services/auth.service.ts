@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/__generated__';
 import { verify } from 'argon2';
-import { UserService } from '@/user';
+import { UserService, removePasswordFromUser } from '@/user';
 import { AuthMessageConstants } from '../constants/auth-message.constants';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
@@ -19,7 +19,7 @@ export class AuthService {
   public async login(dto: LoginDto): Promise<AuthResult> {
     const user = await this._validateUser(dto);
 
-    return this._getUserWithoutPassword(user);
+    return removePasswordFromUser(user);
   }
 
   public async register(dto: RegisterDto): Promise<AuthResult> {
@@ -32,7 +32,7 @@ export class AuthService {
 
     const user = await this._userService.create(createUserDto);
 
-    return this._getUserWithoutPassword(user);
+    return removePasswordFromUser(user);
   }
 
   public async getUserById(id: string): Promise<AuthResult> {
@@ -40,7 +40,7 @@ export class AuthService {
 
     if (!user) throw new NotFoundException(AuthMessageConstants.USER_NOT_FOUND);
 
-    return this._getUserWithoutPassword(user);
+    return removePasswordFromUser(user);
   }
 
   private async _validateUser(dto: LoginDto): Promise<User> {
@@ -59,11 +59,5 @@ export class AuthService {
       );
 
     return user;
-  }
-
-  private _getUserWithoutPassword(user: User): AuthResult {
-    const { password, ...userData } = user;
-
-    return userData;
   }
 }
