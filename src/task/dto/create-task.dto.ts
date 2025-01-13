@@ -34,8 +34,11 @@ export class CreateTaskDto {
   @IsEnum(Priority, { message: TaskValidationConstants.INCORRECT_PRIORITY })
   priority?: Priority;
 
-  @ApiProperty({ example: { id: 'cm5m0v1tt0000iob8oiy0txly' }, isArray: true })
+  @ApiProperty({
+    example: [{ id: 'cm5m0v1tt0000iob8oiy0txly' }],
+    isArray: true,
+  })
   @IsOptional()
   @IsArray({ message: TaskValidationConstants.INCORRECT_TAGS })
-  tags?: { id: string };
+  tags?: { id: string }[];
 }
