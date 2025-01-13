@@ -150,7 +150,7 @@ describe('TaskService', () => {
       };
     });
 
-    it('should call prisma create with correct data', async () => {
+    it('should call prisma update with correct data', async () => {
       await service.update(userId, taskId, dto);
 
       expect(prismaService.task.update).toHaveBeenCalledWith({
@@ -168,7 +168,7 @@ describe('TaskService', () => {
       });
     });
 
-    it('should update a user with a hashed password', async () => {
+    it('should update task', async () => {
       prismaService.task.update.mockResolvedValue({ ...task, ...dto });
 
       const result = await service.update(userId, taskId, dto);
@@ -212,6 +212,27 @@ describe('TaskService', () => {
       expect(
         service.toggleTaskState(userId, taskId, 'isCompleted'),
       ).rejects.toThrow(TaskMessageConstants.TASK_NOT_FOUND);
+    });
+  });
+
+  describe('delete', () => {
+    it('should call prisma delete with correct data', async () => {
+      await service.delete(userId, taskId);
+
+      expect(prismaService.task.delete).toHaveBeenCalledWith({
+        where: {
+          userId,
+          id: taskId,
+        },
+      });
+    });
+
+    it('should delete task', async () => {
+      prismaService.task.delete.mockResolvedValue(task);
+
+      const result = await service.delete(userId, taskId);
+
+      expect(result).toEqual(task);
     });
   });
 });
