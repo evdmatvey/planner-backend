@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { MessageResponse } from '@/shared/swagger-types/message-response';
 import { AuthMessageConstants } from '../constants/auth-message.constants';
-import { AuthValidationConstants } from '../constants/auth-validation.constants';
 
 export class AuthUserResponse {
   @ApiProperty({ example: 'cm5m0v1tt0000iob8oiy0txly' })
@@ -19,11 +19,6 @@ export class AuthUserResponse {
   updatedAt: string;
 }
 
-export class AuthMessageResponse {
-  @ApiProperty({ example: AuthMessageConstants.SUCCESS_LOGIN })
-  message: string;
-}
-
 export class AuthOkResponse {
   @ApiProperty({ type: AuthUserResponse })
   user: AuthUserResponse;
@@ -34,7 +29,7 @@ export class AuthOkResponse {
   accessToken: string;
 }
 
-export class AuthOkResponseWithMessage extends AuthMessageResponse {
+export class AuthOkResponseWithMessage extends MessageResponse {
   @ApiProperty({ type: AuthUserResponse })
   user: AuthUserResponse;
 
@@ -42,17 +37,6 @@ export class AuthOkResponseWithMessage extends AuthMessageResponse {
     example: 'eyJhbGciOi.DEwfQ.9ExBwz6oXx_IYvSJOyVbET7Rs8wiDwVfssBEtuvIJWI',
   })
   accessToken: string;
-}
-
-export class AuthRegisterConflictResponse {
-  @ApiProperty({ example: AuthMessageConstants.USER_ALREADY_EXIST })
-  message: string;
-
-  @ApiProperty({ example: 'Conflict' })
-  error: string;
-
-  @ApiProperty({ example: 409 })
-  statusCode: number;
 }
 
 export class AuthLoginUnauthorizedResponse {
@@ -74,30 +58,5 @@ export class AuthUnauthorizedResponse {
   error: string;
 
   @ApiProperty({ example: 401 })
-  statusCode: number;
-}
-
-export class AuthNotFoundResponse {
-  @ApiProperty({ example: AuthMessageConstants.USER_NOT_FOUND })
-  message: string;
-
-  @ApiProperty({ example: 'Not Found' })
-  error: string;
-
-  @ApiProperty({ example: 404 })
-  statusCode: number;
-}
-
-export class AuthBadRequestResponse {
-  @ApiProperty({
-    example: [AuthValidationConstants.EMPTY_EMAIL],
-    isArray: true,
-  })
-  message: string[];
-
-  @ApiProperty({ example: 'Bad Request' })
-  error: string;
-
-  @ApiProperty({ example: 400 })
   statusCode: number;
 }

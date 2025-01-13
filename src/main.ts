@@ -21,7 +21,8 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Planner API')
-    .setVersion('0.0.1')
+    .setVersion('0.4.1')
+    .setDescription('API для приложения по планированию Planner')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
