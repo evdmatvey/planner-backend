@@ -11,27 +11,34 @@ import {
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import {
+  BadRequestResponse,
+  badRequestResponseDescription,
+} from '@/shared/swagger-types/badrequest-response';
+import { ConflictResponse } from '@/shared/swagger-types/conflict-response';
+import { MessageResponse } from '@/shared/swagger-types/message-response';
+import { NotFoundResponse } from '@/shared/swagger-types/notfound-response';
 import { AuthMessageConstants } from './constants/auth-message.constants';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './services/auth.service';
 import { TokenService } from './services/token.service';
 import {
-  AuthBadRequestResponse,
   AuthLoginUnauthorizedResponse,
-  AuthMessageResponse,
-  AuthNotFoundResponse,
   AuthOkResponse,
   AuthOkResponseWithMessage,
-  AuthRegisterConflictResponse,
   AuthUnauthorizedResponse,
 } from './types';
 
+@ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -42,8 +49,15 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
-  @ApiOkResponse({ type: AuthOkResponseWithMessage })
-  @ApiBadRequestResponse({ type: AuthBadRequestResponse })
+  @ApiOperation({ summary: 'Авторизация' })
+  @ApiOkResponse({
+    type: AuthOkResponseWithMessage,
+    description: 'Успешно авторизован',
+  })
+  @ApiBadRequestResponse({
+    type: BadRequestResponse,
+    description: badRequestResponseDescription,
+  })
   @ApiUnauthorizedResponse({ type: AuthLoginUnauthorizedResponse })
   public async login(
     @Body() dto: LoginDto,
@@ -66,9 +80,20 @@ export class AuthController {
   @Post('register')
   @HttpCode(201)
   @UsePipes(new ValidationPipe())
-  @ApiOkResponse({ type: AuthOkResponseWithMessage })
-  @ApiBadRequestResponse({ type: AuthBadRequestResponse })
-  @ApiConflictResponse({ type: AuthRegisterConflictResponse })
+  @ApiOperation({ summary: 'Регистрация' })
+  @ApiCreatedResponse({
+    type: AuthOkResponseWithMessage,
+    description: 'Аккаунт успешно создан',
+  })
+  @ApiBadRequestResponse({
+    type: BadRequestResponse,
+    description: badRequestResponseDescription,
+  })
+  @ApiConflictResponse({
+    type: ConflictResponse,
+    description:
+      'Регистрация требует уникальный email. Не должно быть пользователей с одинаковым email',
+  })
   public async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
@@ -89,7 +114,11 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(200)
-  @ApiOkResponse({ type: AuthMessageResponse })
+  @ApiOperation({ summary: 'Выход из системы' })
+  @ApiOkResponse({
+    type: MessageResponse,
+    description: 'Успешный выход из системы',
+  })
   public async logout(@Res({ passthrough: true }) res: Response) {
     this._tokenService.removeRefreshTokenFromResponse(res);
 
@@ -100,8 +129,15 @@ export class AuthController {
 
   @Post('login/access-token')
   @HttpCode(200)
-  @ApiOkResponse({ type: AuthOkResponse })
-  @ApiNotFoundResponse({ type: AuthNotFoundResponse })
+  @ApiOperation({ summary: 'Получение нового access токена по refresh' })
+  @ApiOkResponse({
+    type: AuthOkResponse,
+    description: 'Токены успешно обновлены',
+  })
+  @ApiNotFoundResponse({
+    type: NotFoundResponse,
+    description: 'Пользователь с id из refresh token не найден',
+  })
   @ApiUnauthorizedResponse({ type: AuthUnauthorizedResponse })
   public async getNewToken(
     @Req() req: Request,

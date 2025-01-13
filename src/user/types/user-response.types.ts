@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserMessageConstants } from '../constants/user-message.constants';
-import { UserValidationConstants } from '../constants/user-validation.constants';
+import { MessageResponse } from '@/shared/swagger-types/message-response';
 
 export class UserResponse {
   @ApiProperty({ example: 'cm5m0v1tt0000iob8oiy0txly' })
@@ -19,34 +18,7 @@ export class UserResponse {
   updatedAt: string;
 }
 
-export class UpdateUserOkResponse {
+export class UpdateUserOkResponse extends MessageResponse {
   @ApiProperty({ type: UserResponse })
   user: UserResponse;
-
-  @ApiProperty({
-    example: UserMessageConstants.SUCCESS_UPDATE,
-  })
-  message: string;
-}
-
-export class UnauthorizedResponse {
-  @ApiProperty({ example: 'Unauthorized' })
-  error: string;
-
-  @ApiProperty({ example: 401 })
-  statusCode: number;
-}
-
-export class UserBadRequestResponse {
-  @ApiProperty({
-    example: [UserValidationConstants.EMPTY_EMAIL],
-    isArray: true,
-  })
-  message: string[];
-
-  @ApiProperty({ example: 'Bad Request' })
-  error: string;
-
-  @ApiProperty({ example: 400 })
-  statusCode: number;
 }

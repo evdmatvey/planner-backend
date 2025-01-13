@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Framework-nestjs-blue%3Fstyle%3Dflat" alt="Framework-nestjs"/>
-  <img src="https://img.shields.io/badge/Version-0.4.1_(Beta)-purple?style=flat" alt="Version-0.4.1(Beta)"/>
+  <img src="https://img.shields.io/badge/Version-1.0.0-purple?style=flat" alt="Version-1.0.0"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="License-MIT"/>
 </p>
 
@@ -28,8 +28,8 @@ The server part of a planner web application. You can create tasks with the app 
 - [x] Add authorization / registration / authentication
 - [x] Add `Dockerfile`
 - [x] Add user profile update
-- [ ] Add manage user tags
-- [ ] Add manage user tasks
+- [x] Add manage user tags
+- [x] Add manage user tasks
 - [ ] Add manage projects
 - [ ] Add manage projects tasks
 
