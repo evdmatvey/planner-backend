@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/shared/services/prisma.service';
+import { TaskMessageConstants } from './constants/task-message.constants';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -38,6 +40,44 @@ export class TaskService {
       },
       include: {
         tags: true,
+      },
+    });
+  }
+
+  public async update(userId: string, taskId: string, dto: UpdateTaskDto) {
+    return this._prisma.task.update({
+      where: {
+        userId,
+        id: taskId,
+      },
+      data: {
+        ...dto,
+        tags: {
+          connect: dto.tags,
+        },
+      },
+      include: {
+        tags: true,
+      },
+    });
+  }
+
+  public async toggleTaskState(
+    userId: string,
+    taskId: string,
+    state: 'isPinned' | 'isCompleted',
+  ) {
+    const task = await this.getById(userId, taskId);
+
+    if (!task) throw new NotFoundException(TaskMessageConstants.TASK_NOT_FOUND);
+
+    return this._prisma.task.update({
+      where: {
+        userId,
+        id: taskId,
+      },
+      data: {
+        [state]: !task[state],
       },
     });
   }

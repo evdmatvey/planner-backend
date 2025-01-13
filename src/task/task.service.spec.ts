@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Priority, Task } from '@prisma/__generated__';
 import { mockPrismaService } from '@/shared/mocks/prisma-service.mock';
 import { PrismaService } from '@/shared/services/prisma.service';
+import { TaskMessageConstants } from './constants/task-message.constants';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskService } from './task.service';
 
 describe('TaskService', () => {
@@ -132,6 +134,84 @@ describe('TaskService', () => {
       const result = await service.create(userId, dto);
 
       expect(result).toEqual(task);
+    });
+  });
+
+  describe('update', () => {
+    let dto: UpdateTaskDto;
+
+    beforeEach(() => {
+      dto = {
+        title: 'new title',
+        description: task.description,
+        executionTime: task.executionTime,
+        priority: task.priority,
+        tags: [],
+      };
+    });
+
+    it('should call prisma create with correct data', async () => {
+      await service.update(userId, taskId, dto);
+
+      expect(prismaService.task.update).toHaveBeenCalledWith({
+        where: {
+          userId,
+          id: taskId,
+        },
+        data: {
+          ...dto,
+          tags: { connect: dto.tags },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    });
+
+    it('should update a user with a hashed password', async () => {
+      prismaService.task.update.mockResolvedValue({ ...task, ...dto });
+
+      const result = await service.update(userId, taskId, dto);
+
+      expect(result).toEqual({ ...task, ...dto });
+    });
+  });
+
+  describe('toggleTaskState', () => {
+    it('should toggle isCompleted to true', async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue(task);
+      mockPrismaService.task.update.mockResolvedValue({
+        ...task,
+        isCompleted: !task.isCompleted,
+      });
+
+      const result = await service.toggleTaskState(
+        userId,
+        taskId,
+        'isCompleted',
+      );
+
+      expect(result.isCompleted).toBe(true);
+    });
+
+    it('should toggle isPinned to true', async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue(task);
+      mockPrismaService.task.update.mockResolvedValue({
+        ...task,
+        isPinned: !task.isPinned,
+      });
+
+      const result = await service.toggleTaskState(userId, taskId, 'isPinned');
+
+      expect(result.isPinned).toBe(true);
+    });
+
+    it('should throw error if task not found', async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue(null);
+
+      expect(
+        service.toggleTaskState(userId, taskId, 'isCompleted'),
+      ).rejects.toThrow(TaskMessageConstants.TASK_NOT_FOUND);
     });
   });
 });
