@@ -12,4 +12,6 @@ export const TaskValidationConstants = {
   EMPTY_PRIORITY: 'Приоритет задачи не должен быть пустым.',
 
   INCORRECT_TAGS: 'Прикреплённые к задаче тэги должны быть массивом.',
+
+  INCORRECT_CREATED_AT: 'Дата задачи должна быть в формате ISO 8601.',
 };
