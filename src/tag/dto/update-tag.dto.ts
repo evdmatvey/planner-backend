@@ -5,7 +5,6 @@ import { TagValidationConstants } from '../constants/tag-validation.constants';
 
 export class UpdateTagDto {
   @ApiProperty({ example: 'Работа' })
-  @IsOptional()
   @IsString({ message: TagValidationConstants.IS_STRING_TITLE })
   @IsNotEmpty({ message: TagValidationConstants.EMPTY_TITLE })
   title: string;
