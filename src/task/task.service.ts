@@ -62,11 +62,7 @@ export class TaskService {
     });
   }
 
-  public async toggleTaskState(
-    userId: string,
-    taskId: string,
-    state: 'isPinned' | 'isCompleted',
-  ) {
+  public async toggleIsCompleted(userId: string, taskId: string) {
     const task = await this.getById(userId, taskId);
 
     if (!task) throw new NotFoundException(TaskMessageConstants.TASK_NOT_FOUND);
@@ -77,7 +73,7 @@ export class TaskService {
         id: taskId,
       },
       data: {
-        [state]: !task[state],
+        isCompleted: !task.isCompleted,
       },
     });
   }

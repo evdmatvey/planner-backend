@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,14 +8,13 @@ import {
   Patch,
   Post,
   Put,
-  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -24,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
+import { NotFoundResponse } from '@/shared/swagger-types/notfound-response';
 import {
   UnauthorizedResponse,
   unauthorizedResponseDescription,
@@ -36,7 +35,6 @@ import {
   TaskWithMessageResponse,
   TaskWithTagsAndMessageResponse,
   TaskWithTagsResponse,
-  ToggleTaskStateBadRequestResponse,
 } from './types/task-response.types';
 
 @ApiBearerAuth()
@@ -127,45 +125,28 @@ export class TaskController {
   @Auth()
   @HttpCode(200)
   @ApiOperation({
-    summary:
-      'Переключение задача выполнена/не выполнена или закреплена/откреплена',
+    summary: 'Переключение задача выполнена/не выполнена',
   })
   @ApiOkResponse({ type: TaskWithMessageResponse })
   @ApiUnauthorizedResponse({
     type: UnauthorizedResponse,
     description: unauthorizedResponseDescription,
   })
-  @ApiBadRequestResponse({
-    type: ToggleTaskStateBadRequestResponse,
-    description:
-      'Передан неверный ключ в query параметре state. Нужно использовать: "isPinned" | "isCompleted"',
+  @ApiNotFoundResponse({
+    type: NotFoundResponse,
+    description: 'Задача не найдена по переданному id',
   })
   public async toggleComplete(
     @UseUser('id') userId: string,
     @Param('id') taskId: string,
-    @Query('state') state: 'isCompleted' | 'isPinned',
   ) {
-    if (state !== 'isCompleted' && state !== 'isPinned')
-      throw new BadRequestException(TaskMessageConstants.INCORRECT_TASK_STATE);
-
-    const task = await this._taskService.toggleTaskState(userId, taskId, state);
-
-    if (task[state]) {
-      return {
-        task,
-        message:
-          state === 'isCompleted'
-            ? TaskMessageConstants.TASK_COMPLETED
-            : TaskMessageConstants.TASK_PINNED,
-      };
-    }
+    const task = await this._taskService.toggleIsCompleted(userId, taskId);
 
     return {
       task,
-      message:
-        state === 'isCompleted'
-          ? TaskMessageConstants.TASK_UNCOMPLETED
-          : TaskMessageConstants.TASK_UNPINNED,
+      message: task.isCompleted
+        ? TaskMessageConstants.TASK_COMPLETED
+        : TaskMessageConstants.TASK_UNCOMPLETED,
     };
   }
 

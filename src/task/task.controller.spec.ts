@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Priority, Task } from '@prisma/__generated__';
 import { TaskMessageConstants } from './constants/task-message.constants';
@@ -21,7 +20,7 @@ describe('TaskController', () => {
       getById: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
-      toggleTaskState: jest.fn(),
+      toggleIsCompleted: jest.fn(),
       delete: jest.fn(),
     };
 
@@ -41,7 +40,6 @@ describe('TaskController', () => {
       title: 'Test Task',
       description: 'Test Description',
       isCompleted: false,
-      isPinned: false,
       createdAt: new Date(0),
       updatedAt: new Date(0),
       executionTime: 50,
@@ -151,42 +149,30 @@ describe('TaskController', () => {
     });
   });
 
-  describe('toggleComplete', () => {
-    let state: 'isCompleted' | 'isPinned';
-
+  describe('toggleCompleted', () => {
     beforeEach(() => {
-      state = 'isCompleted';
-
-      mockTaskService.toggleTaskState.mockResolvedValue({
+      mockTaskService.toggleIsCompleted.mockResolvedValue({
         ...task,
         isCompleted: true,
       });
     });
 
     it('should call toggleTaskState method of taskService', async () => {
-      await taskController.toggleComplete(userId, taskId, state);
+      await taskController.toggleComplete(userId, taskId);
 
-      expect(mockTaskService.toggleTaskState).toHaveBeenCalledWith(
+      expect(mockTaskService.toggleIsCompleted).toHaveBeenCalledWith(
         userId,
         taskId,
-        state,
       );
     });
 
     it('should toggle the completion state of a task and return the updated task with a message', async () => {
-      const result = await taskController.toggleComplete(userId, taskId, state);
+      const result = await taskController.toggleComplete(userId, taskId);
 
       expect(result).toEqual({
         task: { ...task, isCompleted: true },
         message: TaskMessageConstants.TASK_COMPLETED,
       });
-    });
-
-    it('should throw BadRequestException if an invalid state is provided', async () => {
-      await expect(
-        // @ts-expect-error необходимо передать неверное значение state для проверки
-        taskController.toggleComplete(userId, taskId, 'invalidState'),
-      ).rejects.toThrow(BadRequestException);
     });
   });
 

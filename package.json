@@ -1,6 +1,6 @@
 {
   "name": "planner-backend",
-  "version": "0.4.1",
+  "version": "1.0.0",
   "description": "The server part of a planner web application",
   "author": "",
   "private": true,

@@ -32,7 +32,6 @@ describe('TaskService', () => {
       description: 'description',
       executionTime: 60,
       isCompleted: false,
-      isPinned: false,
       priority: Priority.LOW,
       userId,
       createdAt: new Date(0),
@@ -177,7 +176,7 @@ describe('TaskService', () => {
     });
   });
 
-  describe('toggleTaskState', () => {
+  describe('toggleIsCompleted', () => {
     it('should toggle isCompleted to true', async () => {
       mockPrismaService.task.findUnique.mockResolvedValue(task);
       mockPrismaService.task.update.mockResolvedValue({
@@ -185,33 +184,17 @@ describe('TaskService', () => {
         isCompleted: !task.isCompleted,
       });
 
-      const result = await service.toggleTaskState(
-        userId,
-        taskId,
-        'isCompleted',
-      );
+      const result = await service.toggleIsCompleted(userId, taskId);
 
       expect(result.isCompleted).toBe(true);
-    });
-
-    it('should toggle isPinned to true', async () => {
-      mockPrismaService.task.findUnique.mockResolvedValue(task);
-      mockPrismaService.task.update.mockResolvedValue({
-        ...task,
-        isPinned: !task.isPinned,
-      });
-
-      const result = await service.toggleTaskState(userId, taskId, 'isPinned');
-
-      expect(result.isPinned).toBe(true);
     });
 
     it('should throw error if task not found', async () => {
       mockPrismaService.task.findUnique.mockResolvedValue(null);
 
-      expect(
-        service.toggleTaskState(userId, taskId, 'isCompleted'),
-      ).rejects.toThrow(TaskMessageConstants.TASK_NOT_FOUND);
+      expect(service.toggleIsCompleted(userId, taskId)).rejects.toThrow(
+        TaskMessageConstants.TASK_NOT_FOUND,
+      );
     });
   });
 

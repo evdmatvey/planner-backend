@@ -23,9 +23,6 @@ export class TaskResponse {
   @ApiProperty({ example: false })
   isCompleted: false;
 
-  @ApiProperty({ example: false })
-  isPinned: false;
-
   @ApiProperty({ example: '2025-01-13T05:52:25.460Z' })
   createdAt: string;
 
