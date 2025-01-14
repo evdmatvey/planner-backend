@@ -39,7 +39,7 @@ Clone the repo and install the dependencies.
 
 ```
   git clone https://github.com/evdmatvey/planner-backend.git
-  cd ecommerce-backend
+  cd planner-backend
 ```
 
 ```
