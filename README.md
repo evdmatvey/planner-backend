@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Framework-nestjs-blue%3Fstyle%3Dflat" alt="Framework-nestjs"/>
-  <img src="https://img.shields.io/badge/Version-1.0.0-purple?style=flat" alt="Version-1.0.0"/>
+  <img src="https://img.shields.io/badge/Version-1.0.1-purple?style=flat" alt="Version-1.0.1"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="License-MIT"/>
 </p>
 
@@ -39,7 +39,7 @@ Clone the repo and install the dependencies.
 
 ```
   git clone https://github.com/evdmatvey/planner-backend.git
-  cd ecommerce-backend
+  cd planner-backend
 ```
 
 ```

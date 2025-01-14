@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Priority } from '@prisma/__generated__';
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -33,6 +34,11 @@ export class CreateTaskDto {
   @IsNotEmpty({ message: TaskValidationConstants.EMPTY_PRIORITY })
   @IsEnum(Priority, { message: TaskValidationConstants.INCORRECT_PRIORITY })
   priority?: Priority;
+
+  @ApiProperty({ example: '2025-01-07T05:20:26.369Z' })
+  @IsOptional()
+  @IsDateString({}, { message: TaskValidationConstants.INCORRECT_CREATED_AT })
+  createdAt?: string;
 
   @ApiProperty({
     example: [{ id: 'cm5m0v1tt0000iob8oiy0txly' }],
