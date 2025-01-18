@@ -147,6 +147,11 @@ describe('TaskService', () => {
         priority: task.priority,
         tags: [],
       };
+
+      mockPrismaService.task.findUnique.mockResolvedValue({
+        ...task,
+        tags: [],
+      });
     });
 
     it('should call prisma update with correct data', async () => {
@@ -159,7 +164,7 @@ describe('TaskService', () => {
         },
         data: {
           ...dto,
-          tags: { connect: dto.tags },
+          tags: { connect: dto.tags, disconnect: [] },
         },
         include: {
           tags: true,

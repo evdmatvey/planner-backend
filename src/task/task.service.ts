@@ -45,6 +45,12 @@ export class TaskService {
   }
 
   public async update(userId: string, taskId: string, dto: UpdateTaskDto) {
+    const currentTask = await this.getById(userId, taskId);
+    const tagsToDisconnect = currentTask.tags.map((tag) => ({
+      id: tag.id,
+    }));
+    const tagsToConnect = dto.tags ?? [];
+
     return this._prisma.task.update({
       where: {
         userId,
@@ -53,7 +59,8 @@ export class TaskService {
       data: {
         ...dto,
         tags: {
-          connect: dto.tags,
+          disconnect: tagsToDisconnect,
+          connect: tagsToConnect,
         },
       },
       include: {
