@@ -21,7 +21,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Planner API')
-    .setVersion('1.0.1')
+    .setVersion('1.0.2')
     .setDescription('API для приложения по планированию Planner')
     .addBearerAuth()
     .build();
