@@ -14,4 +14,6 @@ export const TaskValidationConstants = {
   INCORRECT_TAGS: 'Прикреплённые к задаче тэги должны быть массивом.',
 
   INCORRECT_CREATED_AT: 'Дата задачи должна быть в формате ISO 8601.',
+
+  INCORRECT_IS_COMPLETED: 'Статус задачи должен быть логическим значением.',
 };
