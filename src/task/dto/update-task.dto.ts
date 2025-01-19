@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Priority } from '@prisma/__generated__';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNotEmpty,
@@ -48,4 +49,9 @@ export class UpdateTaskDto {
   @IsOptional()
   @IsDateString({}, { message: TaskValidationConstants.INCORRECT_CREATED_AT })
   createdAt?: string;
+
+  @ApiProperty({ example: '2025-01-07T05:20:26.369Z' })
+  @IsOptional()
+  @IsBoolean({ message: TaskValidationConstants.INCORRECT_IS_COMPLETED })
+  isCompleted?: boolean;
 }
