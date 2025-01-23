@@ -50,7 +50,7 @@ export class UpdateTaskDto {
   @IsDateString({}, { message: TaskValidationConstants.INCORRECT_CREATED_AT })
   createdAt?: string;
 
-  @ApiProperty({ example: '2025-01-07T05:20:26.369Z' })
+  @ApiProperty({ example: true })
   @IsOptional()
   @IsBoolean({ message: TaskValidationConstants.INCORRECT_IS_COMPLETED })
   isCompleted?: boolean;
