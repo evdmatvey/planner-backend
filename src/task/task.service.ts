@@ -49,7 +49,7 @@ export class TaskService {
     const tagsToDisconnect = currentTask.tags.map((tag) => ({
       id: tag.id,
     }));
-    const tagsToConnect = dto.tags ?? [];
+    const tagsToConnect = dto.tags ?? tagsToDisconnect;
 
     return this._prisma.task.update({
       where: {
