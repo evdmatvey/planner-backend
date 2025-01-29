@@ -12,6 +12,16 @@ export class TagService {
       where: {
         userId,
       },
+      include: {
+        tasks: {
+          select: {
+            id: true,
+            executionTime: true,
+            createdAt: true,
+            isCompleted: true,
+          },
+        },
+      },
     });
   }
 
@@ -20,6 +30,16 @@ export class TagService {
       where: {
         userId,
         id: tagId,
+      },
+      include: {
+        tasks: {
+          select: {
+            id: true,
+            executionTime: true,
+            createdAt: true,
+            isCompleted: true,
+          },
+        },
       },
     });
   }
