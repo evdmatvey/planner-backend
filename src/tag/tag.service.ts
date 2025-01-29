@@ -18,6 +18,7 @@ export class TagService {
             id: true,
             executionTime: true,
             createdAt: true,
+            isCompleted: true,
           },
         },
       },

@@ -49,6 +49,7 @@ describe('TagService', () => {
               id: true,
               executionTime: true,
               createdAt: true,
+              isCompleted: true,
             },
           },
         },
