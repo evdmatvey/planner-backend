@@ -40,7 +40,18 @@ describe('TagService', () => {
       await service.getAll(userId);
 
       expect(prismaService.tag.findMany).toHaveBeenCalledWith({
-        where: { userId },
+        where: {
+          userId,
+        },
+        include: {
+          tasks: {
+            select: {
+              id: true,
+              executionTime: true,
+              createdAt: true,
+            },
+          },
+        },
       });
     });
 

@@ -12,6 +12,15 @@ export class TagService {
       where: {
         userId,
       },
+      include: {
+        tasks: {
+          select: {
+            id: true,
+            executionTime: true,
+            createdAt: true,
+          },
+        },
+      },
     });
   }
 
