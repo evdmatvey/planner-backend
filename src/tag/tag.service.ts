@@ -31,6 +31,16 @@ export class TagService {
         userId,
         id: tagId,
       },
+      include: {
+        tasks: {
+          select: {
+            id: true,
+            executionTime: true,
+            createdAt: true,
+            isCompleted: true,
+          },
+        },
+      },
     });
   }
 

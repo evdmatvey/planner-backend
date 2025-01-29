@@ -81,6 +81,16 @@ describe('TagService', () => {
 
       expect(prismaService.tag.findUnique).toHaveBeenCalledWith({
         where: { userId, id: tagId },
+        include: {
+          tasks: {
+            select: {
+              id: true,
+              executionTime: true,
+              createdAt: true,
+              isCompleted: true,
+            },
+          },
+        },
       });
     });
 
