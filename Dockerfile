@@ -1,5 +1,9 @@
 FROM node:20
 
+RUN apt-get update && apt-get install -y tzdata
+
+ENV TZ=Asia/Krasnoyarsk
+
 WORKDIR /app
 
 COPY package*.json ./
