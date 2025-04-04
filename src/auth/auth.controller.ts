@@ -19,6 +19,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { Turnstile } from 'nestjs-cloudflare-captcha';
 import {
   BadRequestResponse,
   badRequestResponseDescription,
@@ -48,6 +49,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
+  @Turnstile()
   @UsePipes(new ValidationPipe())
   @ApiOperation({ summary: 'Авторизация' })
   @ApiOkResponse({
@@ -79,6 +81,7 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(201)
+  @Turnstile()
   @UsePipes(new ValidationPipe())
   @ApiOperation({ summary: 'Регистрация' })
   @ApiCreatedResponse({

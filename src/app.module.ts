@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TurnstileModule } from 'nestjs-cloudflare-captcha';
 import { AnalyticsModule } from './analytics';
 import { AuthModule } from './auth';
 import { TagModule } from './tag';
@@ -10,6 +11,13 @@ import { UserModule } from './user';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    TurnstileModule.forRoot({
+      secretKey: process.env.CAPTCHA_SECRET_KEY,
+      token: (req) => req.body.captchaToken,
+      skipIf:
+        process.env.NODE_ENV === 'development' ||
+        process.env.NODE_ENV === 'test',
     }),
     UserModule,
     AuthModule,
