@@ -12,6 +12,11 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './services/auth.service';
 import { TokenService } from './services/token.service';
 
+jest.mock('nestjs-cloudflare-captcha', () => ({
+  // eslint-disable-next-line
+  Turnstile: () => (target, key, descriptor) => descriptor,
+}));
+
 describe('AuthController', () => {
   let authController: AuthController;
 
