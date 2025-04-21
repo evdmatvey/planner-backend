@@ -28,8 +28,8 @@ import { ConflictResponse } from '@/shared/swagger-types/conflict-response';
 import { MessageResponse } from '@/shared/swagger-types/message-response';
 import { NotFoundResponse } from '@/shared/swagger-types/notfound-response';
 import { AuthMessageConstants } from './constants/auth-message.constants';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { LoginBody, LoginDto } from './dto/login.dto';
+import { RegisterBody, RegisterDto } from './dto/register.dto';
 import { AuthService } from './services/auth.service';
 import { TokenService } from './services/token.service';
 import {
@@ -62,9 +62,10 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({ type: AuthLoginUnauthorizedResponse })
   public async login(
-    @Body() dto: LoginDto,
+    @Body() body: LoginBody,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const dto = this._removeCaptchaTokenFromBody(body) as LoginDto;
     const user = await this._authService.login(dto);
     const { accessToken, refreshToken } = this._tokenService.createTokens(
       user.id,
@@ -98,9 +99,10 @@ export class AuthController {
       'Регистрация требует уникальный email. Не должно быть пользователей с одинаковым email',
   })
   public async register(
-    @Body() dto: RegisterDto,
+    @Body() body: RegisterBody,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const dto = this._removeCaptchaTokenFromBody(body) as RegisterDto;
     const user = await this._authService.register(dto);
     const { accessToken, refreshToken } = this._tokenService.createTokens(
       user.id,
@@ -163,5 +165,13 @@ export class AuthController {
       user,
       accessToken,
     };
+  }
+
+  private _removeCaptchaTokenFromBody(
+    body: LoginBody | RegisterBody,
+  ): LoginDto | RegisterDto {
+    const { captchaToken, ...dto } = body;
+
+    return dto;
   }
 }

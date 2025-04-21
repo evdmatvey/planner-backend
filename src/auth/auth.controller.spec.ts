@@ -66,7 +66,10 @@ describe('AuthController', () => {
       mockAuthService.login.mockResolvedValue(user);
       mockTokenService.createTokens.mockReturnValue(tokens);
 
-      const result = await authController.login(loginDto, res);
+      const result = await authController.login(
+        { ...loginDto, captchaToken: 'token' },
+        res,
+      );
 
       expect(result).toEqual({
         user,
@@ -88,7 +91,10 @@ describe('AuthController', () => {
       mockAuthService.login.mockRejectedValue(new UnauthorizedException());
 
       await expect(
-        authController.login(loginDto, {} as Response),
+        authController.login(
+          { ...loginDto, captchaToken: 'token' },
+          {} as Response,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -110,7 +116,10 @@ describe('AuthController', () => {
       mockAuthService.register.mockResolvedValue(user);
       mockTokenService.createTokens.mockReturnValue(tokens);
 
-      const result = await authController.register(registerDto, res);
+      const result = await authController.register(
+        { ...registerDto, captchaToken: 'token' },
+        res,
+      );
 
       expect(result).toEqual({
         user,
@@ -133,7 +142,10 @@ describe('AuthController', () => {
       mockAuthService.register.mockRejectedValue(new ConflictException());
 
       await expect(
-        authController.register(registerDto, {} as Response),
+        authController.register(
+          { ...registerDto, captchaToken: 'token' },
+          {} as Response,
+        ),
       ).rejects.toThrow(ConflictException);
     });
   });
