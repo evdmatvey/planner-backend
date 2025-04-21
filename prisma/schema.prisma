@@ -56,17 +56,18 @@ model Tag {
 }
 
 model FinancesTransaction {
-  id        String   @id @default(cuid())
-  label     String
+  id        String                   @id @default(cuid())
   value     Float
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  label     String?
+  type      FinancesTransactionType?
+  createdAt DateTime                 @default(now()) @map("created_at")
+  updatedAt DateTime                 @updatedAt @map("updated_at")
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @map("user_id")
 
-  financesCategories FinancesCategory @relation(fields: [financesCategoryId], references: [id])
-  financesCategoryId String           @map("finances_category_id")
+  financesCategory   FinancesCategory? @relation(fields: [financesCategoryId], references: [id])
+  financesCategoryId String?           @map("finances_category_id")
 
   @@map("finances_transaction")
 }
