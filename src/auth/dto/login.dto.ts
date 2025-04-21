@@ -17,3 +17,8 @@ export class LoginDto {
   })
   password: string;
 }
+
+export class LoginBody extends LoginDto {
+  @ApiProperty({ example: 'token' })
+  captchaToken: string;
+}

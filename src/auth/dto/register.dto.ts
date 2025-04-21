@@ -16,3 +16,8 @@ export class RegisterDto extends LoginDto {
   })
   passwordRepeat: string;
 }
+
+export class RegisterBody extends RegisterDto {
+  @ApiProperty({ example: 'token' })
+  captchaToken: string;
+}
