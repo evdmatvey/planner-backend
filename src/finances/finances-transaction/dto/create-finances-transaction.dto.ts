@@ -12,13 +12,13 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
-import { FinancesTransactionDescriptionConstants } from '../constants/finances-transaction-description.constants';
-import { FinancesTransactionValidationConstants } from '../constants/finances-transaction-validation.constants';
+import { TransactionDtoDescriptionConstants } from '../swagger';
+import { FinancesTransactionValidationConstants } from './constants/validation';
 
 export class CreateFinanceTransactionDto {
   @ApiProperty({
     example: 1413.23,
-    description: FinancesTransactionDescriptionConstants.VALUE,
+    description: TransactionDtoDescriptionConstants.VALUE,
   })
   @Min(0.0000001, { message: FinancesTransactionValidationConstants.MIN_VALUE })
   @Max(15000000, { message: FinancesTransactionValidationConstants.MAX_VALUE })
@@ -30,7 +30,7 @@ export class CreateFinanceTransactionDto {
 
   @ApiProperty({
     example: FinancesTransactionType.INCOME,
-    description: FinancesTransactionDescriptionConstants.TYPE,
+    description: TransactionDtoDescriptionConstants.TYPE,
   })
   @IsEnum(FinancesTransactionType, {
     message: FinancesTransactionValidationConstants.INCORRECT_TYPE,
@@ -39,7 +39,7 @@ export class CreateFinanceTransactionDto {
 
   @ApiProperty({
     example: 'Пятёрочка',
-    description: FinancesTransactionDescriptionConstants.LABEL,
+    description: TransactionDtoDescriptionConstants.LABEL,
     required: false,
   })
   @ValidateIf((o) => o.label !== null && o.label !== undefined)
@@ -51,7 +51,7 @@ export class CreateFinanceTransactionDto {
 
   @ApiProperty({
     example: '430fjf42jid23D4i23j09eudajshadJJKK',
-    description: FinancesTransactionDescriptionConstants.CATEGORY_ID,
+    description: TransactionDtoDescriptionConstants.CATEGORY_ID,
     required: false,
   })
   @ValidateIf((o) => o.categoryId !== null && o.categoryId !== undefined)
@@ -65,7 +65,7 @@ export class CreateFinanceTransactionDto {
 
   @ApiProperty({
     example: '2025-01-07T05:20:26.369Z',
-    description: FinancesTransactionDescriptionConstants.CREATED_AT,
+    description: TransactionDtoDescriptionConstants.CREATED_AT,
     required: false,
   })
   @IsOptional()
