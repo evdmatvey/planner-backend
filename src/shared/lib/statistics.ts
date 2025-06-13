@@ -35,6 +35,10 @@ export class Statistics<T> {
   ) {
     this._datasetSize = this._estimateDatasetSize();
     this._datasetLength = this._data.length;
+    this._data = this._data.sort(
+      (a, b) =>
+        Number(a[this._measuringValueKey]) - Number(b[this._measuringValueKey]),
+    );
   }
 
   public getMean() {
