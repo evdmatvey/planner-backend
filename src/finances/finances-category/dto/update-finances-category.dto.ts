@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Length } from 'class-validator';
+import { FinancesCategoryDtoDescriptionConstants } from '../swagger';
 import { FinancesCategoryValidationConstants } from './constants/validation';
 
 export class UpdateFinancesCategoryDto {
   @ApiProperty({
     example: 'Продукты',
-    description: '',
+    description: FinancesCategoryDtoDescriptionConstants.TITLE,
   })
   @IsString({ message: FinancesCategoryValidationConstants.IS_STRING_TITLE })
   @Length(3, 30, {
