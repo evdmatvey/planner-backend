@@ -54,8 +54,15 @@ module.exports = {
       },
       {
         selector: 'property',
+        modifiers: ['public'],
         format: ['UPPER_CASE', 'camelCase'],
         leadingUnderscore: 'forbid',
+      },
+      {
+        selector: 'property',
+        modifiers: ['private'],
+        format: ['camelCase', 'UPPER_CASE'],
+        leadingUnderscore: 'allow',
       },
     ],
   },

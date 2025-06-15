@@ -16,8 +16,10 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  tags  Tag[]
-  tasks Task[]
+  tags                 Tag[]
+  tasks                Task[]
+  financesCategories   FinancesCategory[]
+  financesTransactions FinancesTransaction[]
 
   @@map("user")
 }
@@ -53,6 +55,37 @@ model Tag {
   @@map("tag")
 }
 
+model FinancesTransaction {
+  id        String                  @id @default(cuid())
+  value     Float
+  label     String?
+  type      FinancesTransactionType
+  createdAt DateTime                @default(now()) @map("created_at")
+  updatedAt DateTime                @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  financesCategory   FinancesCategory? @relation(fields: [financesCategoryId], references: [id])
+  financesCategoryId String?           @map("finances_category_id")
+
+  @@map("finances_transaction")
+}
+
+model FinancesCategory {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  financeTransactions FinancesTransaction[]
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  @@map("finances_category")
+}
+
 enum Color {
   ACCENT
   ORANGE
@@ -68,4 +101,9 @@ enum Priority {
   LOW
   HIGH
   MEDIUM
+}
+
+enum FinancesTransactionType {
+  INCOME
+  EXPENSE
 }

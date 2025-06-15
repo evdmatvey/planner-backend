@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TurnstileModule } from 'nestjs-cloudflare-captcha';
 import { AnalyticsModule } from './analytics';
 import { AuthModule } from './auth';
+import { FinancesModule } from './finances/finances.module';
 import { TagModule } from './tag';
 import { TaskModule } from './task';
 import { UserModule } from './user';
@@ -24,6 +25,7 @@ import { UserModule } from './user';
     TaskModule,
     TagModule,
     AnalyticsModule,
+    FinancesModule,
   ],
 })
 export class AppModule {}
