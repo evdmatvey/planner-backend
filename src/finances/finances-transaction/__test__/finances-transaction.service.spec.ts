@@ -57,7 +57,7 @@ describe('FinancesTransactionService', () => {
         type: transaction.type,
         value: transaction.value,
         label: transaction.label,
-        categoryId: transaction.financesCategoryId,
+        financesCategoryId: transaction.financesCategoryId,
         createdAt: transaction.createdAt.toISOString(),
       };
 
@@ -81,7 +81,7 @@ describe('FinancesTransactionService', () => {
         type: transaction.type,
         value: transaction.value,
         label: transaction.label,
-        categoryId: transaction.financesCategoryId,
+        financesCategoryId: transaction.financesCategoryId,
         createdAt: transaction.createdAt.toISOString(),
       };
 
@@ -108,7 +108,7 @@ describe('FinancesTransactionService', () => {
         type: transaction.type,
         value: transaction.value,
         label: transaction.label,
-        categoryId: transaction.financesCategoryId,
+        financesCategoryId: transaction.financesCategoryId,
         createdAt: transaction.createdAt.toISOString(),
       };
 

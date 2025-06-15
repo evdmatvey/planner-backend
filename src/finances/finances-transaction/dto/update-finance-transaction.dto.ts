@@ -62,14 +62,16 @@ export class UpdateFinanceTransactionDto {
     description: TransactionDtoDescriptionConstants.CATEGORY_ID,
     required: false,
   })
-  @ValidateIf((o) => o.categoryId !== null && o.categoryId !== undefined)
+  @ValidateIf(
+    (o) => o.financesCategoryId !== null && o.financesCategoryId !== undefined,
+  )
   @IsString({
     message: FinancesTransactionValidationConstants.IS_STRING_CATEGORY_ID,
   })
   @Matches(/^[a-z0-9]{25,}$/i, {
     message: FinancesTransactionValidationConstants.INCORRECT_CATEGORY_ID,
   })
-  categoryId?: string | null;
+  financesCategoryId?: string | null;
 
   @ApiProperty({
     example: '2025-01-07T05:20:26.369Z',
