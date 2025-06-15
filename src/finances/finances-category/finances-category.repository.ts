@@ -36,7 +36,7 @@ export class FinancesCategoryRepository {
   }
 
   public async getById(categoryId: string, userId: string) {
-    return this._prisma.financesCategory.findMany({
+    return this._prisma.financesCategory.findFirst({
       where: {
         id: categoryId,
         userId,
