@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Logger, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -20,7 +20,10 @@ import {
 @Controller('analytics')
 @ApiTags('Аналитика')
 export class AnalyticsController {
-  public constructor(private readonly _analyticsService: AnalyticsService) {}
+  public constructor(
+    private readonly _analyticsService: AnalyticsService,
+    private readonly _logger: Logger,
+  ) {}
 
   @Get('/tags')
   @ApiQuery({
@@ -44,10 +47,32 @@ export class AnalyticsController {
     @Query('tagId') tagId?: string,
     @Query('period') period?: AnalyticsPeriod,
   ) {
-    if (tagId)
-      return this._analyticsService.getTagAnalytics(userId, tagId, period);
+    try {
+      if (tagId) {
+        this._logger.log(
+          `Get tag analytics for tag ${tagId} for user with id ${userId}`,
+        );
+        const analytics = await this._tryGetTagAnalytics(userId, tagId, period);
+        this._logger.log(
+          `Get tag analytics for tag ${tagId} for user with id ${userId}`,
+        );
 
-    return this._analyticsService.getTagsAnalytics(userId, period);
+        return analytics;
+      }
+
+      this._logger.log(`Get tags analytics for user with id ${userId}`);
+      const analytics = await this._tryGetTagsAnalytics(userId, period);
+      this._logger.log(
+        `Tags analytics for user with id ${userId} successfully received`,
+      );
+
+      return analytics;
+    } catch (error) {
+      this._logger.warn(
+        `Error while getting tags analytics for user with id ${userId}. Error message: ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   @Get('/tasks')
@@ -65,6 +90,38 @@ export class AnalyticsController {
   public async getTasksAnalytics(
     @UseUser('id') userId: string,
     @Query('period') period?: AnalyticsPeriod,
+  ) {
+    try {
+      this._logger.log(`Get tasks analytics for user with id ${userId}`);
+      const analytics = await this._tryGetTasksAnalytics(userId, period);
+      this._logger.log(
+        `Tasks analytics for user with id ${userId} successfully received`,
+      );
+
+      return analytics;
+    } catch (error) {
+      this._logger.warn(
+        `Error while getting tasks analytics for user with id ${userId}. Error message: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  private async _tryGetTagAnalytics(
+    userId: string,
+    tagId: string,
+    period?: AnalyticsPeriod,
+  ) {
+    return this._analyticsService.getTagAnalytics(userId, tagId, period);
+  }
+
+  private async _tryGetTagsAnalytics(userId: string, period?: AnalyticsPeriod) {
+    return this._analyticsService.getTagsAnalytics(userId, period);
+  }
+
+  private async _tryGetTasksAnalytics(
+    userId: string,
+    period?: AnalyticsPeriod,
   ) {
     return this._analyticsService.getTasksAnalytics(userId, period);
   }
