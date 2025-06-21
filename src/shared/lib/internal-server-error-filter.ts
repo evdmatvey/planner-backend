@@ -34,10 +34,21 @@ export class InternalServerErrorFilter implements ExceptionFilter {
       const message =
         exception instanceof HttpException
           ? exception.getResponse()
-          : 'Internal server error';
+          : 'Bad request';
 
       this.logger.warn(
         `HTTP 400 Error on ${request.method} ${request.url} — Message: ${JSON.stringify(message)}`,
+      );
+    }
+
+    if (status === 401) {
+      const message =
+        exception instanceof HttpException
+          ? exception.getResponse()
+          : 'Unauthorized';
+
+      this.logger.warn(
+        `HTTP 401 Error on ${request.method} ${request.url} — Message: ${JSON.stringify(message)}`,
       );
     }
 

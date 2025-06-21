@@ -20,7 +20,7 @@ export class TaskService {
   }
 
   public async getById(userId: string, taskId: string) {
-    return this._prisma.task.findUnique({
+    const task = await this._prisma.task.findUnique({
       where: {
         userId,
         id: taskId,
@@ -29,6 +29,10 @@ export class TaskService {
         tags: true,
       },
     });
+
+    if (!task) throw new NotFoundException(TaskMessageConstants.TASK_NOT_FOUND);
+
+    return task;
   }
 
   public async create(userId: string, dto: CreateTaskDto) {
@@ -46,6 +50,7 @@ export class TaskService {
 
   public async update(userId: string, taskId: string, dto: UpdateTaskDto) {
     const currentTask = await this.getById(userId, taskId);
+
     const tagsToDisconnect = currentTask.tags.map((tag) => ({
       id: tag.id,
     }));
@@ -71,8 +76,6 @@ export class TaskService {
 
   public async toggleIsCompleted(userId: string, taskId: string) {
     const task = await this.getById(userId, taskId);
-
-    if (!task) throw new NotFoundException(TaskMessageConstants.TASK_NOT_FOUND);
 
     return this._prisma.task.update({
       where: {

@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Priority, Task } from '@prisma/__generated__';
 import { TaskMessageConstants } from './constants/task-message.constants';
@@ -31,6 +32,7 @@ describe('TaskController', () => {
           provide: TaskService,
           useValue: mockTaskService,
         },
+        Logger,
       ],
     }).compile();
 
@@ -50,6 +52,8 @@ describe('TaskController', () => {
 
   describe('getAll', () => {
     it('should call getAll method of taskService', async () => {
+      mockTaskService.getAll.mockResolvedValue([task]);
+
       await taskController.getAll(userId);
 
       expect(mockTaskService.getAll).toHaveBeenCalledWith(userId);
@@ -74,6 +78,8 @@ describe('TaskController', () => {
 
   describe('getOne', () => {
     it('should call getById method of taskService', async () => {
+      mockTaskService.getById.mockResolvedValue(task);
+
       await taskController.getOne(userId, taskId);
 
       expect(mockTaskService.getById).toHaveBeenCalledWith(userId, taskId);
@@ -107,6 +113,8 @@ describe('TaskController', () => {
     });
 
     it('should call create method of taskService', async () => {
+      mockTaskService.create.mockResolvedValue(task);
+
       await taskController.create(userId, dto);
 
       expect(mockTaskService.create).toHaveBeenCalledWith(userId, dto);
@@ -132,6 +140,8 @@ describe('TaskController', () => {
     });
 
     it('should call update method of taskService', async () => {
+      mockTaskService.update.mockResolvedValue(task);
+
       await taskController.update(userId, taskId, dto);
 
       expect(mockTaskService.update).toHaveBeenCalledWith(userId, taskId, dto);
@@ -158,6 +168,8 @@ describe('TaskController', () => {
     });
 
     it('should call toggleTaskState method of taskService', async () => {
+      mockTaskService.getById.mockResolvedValue(task);
+
       await taskController.toggleComplete(userId, taskId);
 
       expect(mockTaskService.toggleIsCompleted).toHaveBeenCalledWith(
@@ -178,6 +190,8 @@ describe('TaskController', () => {
 
   describe('delete', () => {
     it('should call delete method of taskService', async () => {
+      mockTaskService.delete.mockResolvedValue(task);
+
       await taskController.delete(userId, taskId);
 
       expect(mockTaskService.delete).toHaveBeenCalledWith(userId, taskId);
