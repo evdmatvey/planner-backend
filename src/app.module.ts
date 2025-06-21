@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { TurnstileModule } from 'nestjs-cloudflare-captcha';
 import { AnalyticsModule } from './analytics';
 import { AuthModule } from './auth';
@@ -20,6 +21,7 @@ import { UserModule } from './user';
         process.env.NODE_ENV === 'development' ||
         process.env.NODE_ENV === 'test',
     }),
+    PrometheusModule.register(),
     UserModule,
     AuthModule,
     TaskModule,
