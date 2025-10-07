@@ -2,24 +2,17 @@ import {
   Body,
   Controller,
   HttpCode,
+  Logger,
   Post,
   Req,
   Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Turnstile } from 'nestjs-cloudflare-captcha';
+import { ApiRouteDocs } from '@/shared/swagger';
 import {
   BadRequestResponse,
   badRequestResponseDescription,
@@ -36,72 +29,188 @@ import {
   AuthLoginUnauthorizedResponse,
   AuthOkResponse,
   AuthOkResponseWithMessage,
+  AuthResult,
   AuthUnauthorizedResponse,
 } from './types';
 
 @ApiTags('Авторизация')
+@UsePipes(new ValidationPipe())
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly _authService: AuthService,
     private readonly _tokenService: TokenService,
+    private readonly _logger: Logger,
   ) {}
 
   @Post('login')
   @HttpCode(200)
   @Turnstile()
-  @UsePipes(new ValidationPipe())
-  @ApiOperation({ summary: 'Авторизация' })
-  @ApiOkResponse({
-    type: AuthOkResponseWithMessage,
-    description: 'Успешно авторизован',
+  @ApiRouteDocs({
+    summary: 'Авторизация',
+    apiResponses: {
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
+      },
+      ok: {
+        type: AuthOkResponseWithMessage,
+        description: 'Успешно авторизован',
+      },
+      unauthorized: {
+        type: AuthLoginUnauthorizedResponse,
+        description: 'Неверный логин или пароль',
+      },
+    },
   })
-  @ApiBadRequestResponse({
-    type: BadRequestResponse,
-    description: badRequestResponseDescription,
-  })
-  @ApiUnauthorizedResponse({ type: AuthLoginUnauthorizedResponse })
   public async login(
     @Body() body: LoginBody,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const dto = this._removeCaptchaTokenFromBody(body) as LoginDto;
-    const user = await this._authService.login(dto);
-    const { accessToken, refreshToken } = this._tokenService.createTokens(
-      user.id,
-    );
+    try {
+      this._logger.log(`Login user with email: ${body.email}`);
+      const { user, accessToken } = await this._tryLogin(body, res);
+      this._logger.log(`User with email: ${user.email} logged in`);
 
-    this._tokenService.addRefreshTokenToResponse(res, refreshToken);
-
-    return {
-      user,
-      accessToken,
-      message: AuthMessageConstants.SUCCESS_LOGIN,
-    };
+      return {
+        user,
+        accessToken,
+        message: AuthMessageConstants.SUCCESS_LOGIN,
+      };
+    } catch (error) {
+      this._logger.warn(
+        `Login user with email: ${body.email} failed — ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   @Post('register')
   @HttpCode(201)
   @Turnstile()
-  @UsePipes(new ValidationPipe())
-  @ApiOperation({ summary: 'Регистрация' })
-  @ApiCreatedResponse({
-    type: AuthOkResponseWithMessage,
-    description: 'Аккаунт успешно создан',
-  })
-  @ApiBadRequestResponse({
-    type: BadRequestResponse,
-    description: badRequestResponseDescription,
-  })
-  @ApiConflictResponse({
-    type: ConflictResponse,
-    description:
-      'Регистрация требует уникальный email. Не должно быть пользователей с одинаковым email',
+  @ApiRouteDocs({
+    summary: 'Регистрация',
+    apiResponses: {
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
+      },
+      ok: {
+        type: AuthOkResponseWithMessage,
+        description: 'Аккаунт успешно создан',
+      },
+      unauthorized: {
+        type: AuthLoginUnauthorizedResponse,
+        description: 'Неверный логин или пароль',
+      },
+      conflict: {
+        type: ConflictResponse,
+        description:
+          'Регистрация требует уникальный email. Не должно быть пользователей с одинаковым email',
+      },
+    },
   })
   public async register(
     @Body() body: RegisterBody,
     @Res({ passthrough: true }) res: Response,
   ) {
+    try {
+      this._logger.log(`Register user with email: ${body.email}`);
+      const { user, accessToken } = await this._tryRegister(body, res);
+      this._logger.log(`User with email: ${user.email} registered`);
+
+      return {
+        user,
+        accessToken,
+        message: AuthMessageConstants.SUCCESS_REGISTER,
+      };
+    } catch (error) {
+      this._logger.warn(
+        `Register user with email: ${body.email} failed — ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  @ApiRouteDocs({
+    summary: 'Выход из системы',
+    apiResponses: {
+      ok: {
+        type: MessageResponse,
+        description: 'Успешный выход из системы',
+      },
+    },
+  })
+  public async logout(@Res({ passthrough: true }) res: Response) {
+    try {
+      this._logger.log('Logout user');
+      this._tryLogout(res);
+      this._logger.log('User logged out');
+
+      return {
+        message: AuthMessageConstants.SUCCESS_LOGOUT,
+      };
+    } catch (error) {
+      this._logger.warn(`Logout failed — ${error.message}`);
+      throw error;
+    }
+  }
+
+  @Post('login/access-token')
+  @HttpCode(200)
+  @ApiRouteDocs({
+    summary: 'Получение нового access токена по refresh',
+    apiResponses: {
+      ok: {
+        type: AuthOkResponse,
+        description: 'Токены успешно обновлены',
+      },
+      unauthorized: {
+        type: AuthUnauthorizedResponse,
+        description: 'Неверный refresh токен',
+      },
+      notFound: {
+        type: NotFoundResponse,
+        description: 'Пользователь с id из refresh token не найден',
+      },
+    },
+  })
+  public async getNewToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      this._logger.log('Get new access token');
+      const { user, accessToken } = await this._tryGetNewToken(req, res);
+      this._logger.log('New access token obtained');
+
+      return { user, accessToken };
+    } catch (error) {
+      this._logger.warn(`Get new access token failed — ${error.message}`);
+      throw error;
+    }
+  }
+
+  private async _tryLogin(
+    body: LoginBody,
+    res: Response,
+  ): Promise<{ user: AuthResult; accessToken: string }> {
+    const dto = this._removeCaptchaTokenFromBody(body) as LoginDto;
+    const user = await this._authService.login(dto);
+    const { refreshToken, accessToken } = this._tokenService.createTokens(
+      user.id,
+    );
+    this._tokenService.addRefreshTokenToResponse(res, refreshToken);
+
+    return { user, accessToken };
+  }
+
+  private async _tryRegister(
+    body: RegisterBody,
+    res: Response,
+  ): Promise<{ user: AuthResult; accessToken: string }> {
     const dto = this._removeCaptchaTokenFromBody(body) as RegisterDto;
     const user = await this._authService.register(dto);
     const { accessToken, refreshToken } = this._tokenService.createTokens(
@@ -110,44 +219,17 @@ export class AuthController {
 
     this._tokenService.addRefreshTokenToResponse(res, refreshToken);
 
-    return {
-      user,
-      accessToken,
-      message: AuthMessageConstants.SUCCESS_REGISTER,
-    };
+    return { user, accessToken };
   }
 
-  @Post('logout')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Выход из системы' })
-  @ApiOkResponse({
-    type: MessageResponse,
-    description: 'Успешный выход из системы',
-  })
-  public async logout(@Res({ passthrough: true }) res: Response) {
+  private _tryLogout(res: Response): void {
     this._tokenService.removeRefreshTokenFromResponse(res);
-
-    return {
-      message: AuthMessageConstants.SUCCESS_LOGOUT,
-    };
   }
 
-  @Post('login/access-token')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Получение нового access токена по refresh' })
-  @ApiOkResponse({
-    type: AuthOkResponse,
-    description: 'Токены успешно обновлены',
-  })
-  @ApiNotFoundResponse({
-    type: NotFoundResponse,
-    description: 'Пользователь с id из refresh token не найден',
-  })
-  @ApiUnauthorizedResponse({ type: AuthUnauthorizedResponse })
-  public async getNewToken(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  private async _tryGetNewToken(
+    req: Request,
+    res: Response,
+  ): Promise<{ user: AuthResult; accessToken: string }> {
     const refreshTokenFromCookies =
       this._tokenService.getRefreshTokenFromRequest(req, res);
 
@@ -161,10 +243,7 @@ export class AuthController {
 
     this._tokenService.addRefreshTokenToResponse(res, refreshToken);
 
-    return {
-      user,
-      accessToken,
-    };
+    return { user, accessToken };
   }
 
   private _removeCaptchaTokenFromBody(

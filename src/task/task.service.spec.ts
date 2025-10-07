@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Priority, Task } from '@prisma/__generated__';
 import { mockPrismaService } from '@/shared/mocks/prisma-service.mock';
@@ -72,6 +73,8 @@ describe('TaskService', () => {
 
   describe('getById', () => {
     it('should call prisma findUnique with userId and taskId', async () => {
+      prismaService.task.findUnique.mockResolvedValue(task);
+
       await service.getById(userId, taskId);
 
       expect(prismaService.task.findUnique).toHaveBeenCalledWith({
@@ -90,12 +93,12 @@ describe('TaskService', () => {
       expect(result).toEqual(task);
     });
 
-    it('should return null if task not found by userId and taskId', async () => {
+    it('should throw NotFoundException if task not found by userId and taskId', async () => {
       prismaService.task.findUnique.mockResolvedValue(null);
 
-      const result = await service.getById(userId, taskId);
-
-      expect(result).toBeNull();
+      await expect(service.getById(userId, taskId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Color, Tag } from '@prisma/__generated__';
 import { TagMessageConstants } from './constants/tag-message.constants';
@@ -31,6 +32,7 @@ describe('TagController', () => {
           provide: TagService,
           useValue: mockTagService,
         },
+        Logger,
       ],
     }).compile();
 
@@ -47,6 +49,8 @@ describe('TagController', () => {
 
   describe('getAll', () => {
     it('should call getAll method of tagService', async () => {
+      mockTagService.getAll.mockResolvedValue([tag]);
+
       await tagController.getAll(userId);
 
       expect(mockTagService.getAll).toHaveBeenCalledWith(userId);
@@ -71,6 +75,8 @@ describe('TagController', () => {
 
   describe('getOne', () => {
     it('should call getById method of tagService', async () => {
+      mockTagService.getById.mockResolvedValue(tag);
+
       await tagController.getOne(userId, tagId);
 
       expect(mockTagService.getById).toHaveBeenCalledWith(userId, tagId);
@@ -103,6 +109,8 @@ describe('TagController', () => {
     });
 
     it('should call create method of tagService', async () => {
+      mockTagService.create.mockResolvedValue(tag);
+
       await tagController.create(userId, dto);
 
       expect(mockTagService.create).toHaveBeenCalledWith(userId, dto);
@@ -128,6 +136,8 @@ describe('TagController', () => {
     });
 
     it('should call update method of tagService', async () => {
+      mockTagService.update.mockResolvedValue({ ...tag, ...dto });
+
       await tagController.update(userId, tagId, dto);
 
       expect(mockTagService.update).toHaveBeenCalledWith(userId, tagId, dto);
@@ -147,6 +157,8 @@ describe('TagController', () => {
 
   describe('delete', () => {
     it('should call delete method of tagService', async () => {
+      mockTagService.delete.mockResolvedValue(tag);
+
       await tagController.delete(userId, tagId);
 
       expect(mockTagService.delete).toHaveBeenCalledWith(userId, tagId);

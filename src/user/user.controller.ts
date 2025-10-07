@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Logger,
   Put,
   UsePipes,
   ValidationPipe,
@@ -34,14 +35,18 @@ import {
 import { UserService } from './user.service';
 import { removePasswordFromUser } from './utils/remove-password-from-user.util';
 
+@Auth()
 @ApiBearerAuth()
 @ApiTags('Профиль пользователя')
+@UsePipes(new ValidationPipe())
 @Controller('user/profile')
 export class UserController {
-  constructor(private readonly _userService: UserService) {}
+  constructor(
+    private readonly _userService: UserService,
+    private readonly _logger: Logger,
+  ) {}
 
   @Get()
-  @Auth()
   @HttpCode(200)
   @ApiOperation({ summary: 'Получение профиля пользователя' })
   @ApiOkResponse({
@@ -53,15 +58,22 @@ export class UserController {
     description: unauthorizedResponseDescription,
   })
   public async getProfile(@UseUser('id') userId: string) {
-    const user = await this._userService.getById(userId);
+    try {
+      this._logger.log(`Get user with id: ${userId}`);
+      const user = await this._tryGetUser(userId);
+      this._logger.log(`User with id: ${userId} successfully received`);
 
-    return removePasswordFromUser(user);
+      return removePasswordFromUser(user);
+    } catch (error) {
+      this._logger.warn(
+        `Error while getting user with id: ${userId}. Error message: ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   @Put()
-  @Auth()
   @HttpCode(200)
-  @UsePipes(new ValidationPipe())
   @ApiOperation({ summary: 'Обновление профиля пользователя' })
   @ApiUnauthorizedResponse({
     type: UnauthorizedResponse,
@@ -79,11 +91,32 @@ export class UserController {
     @UseUser('id') userId: string,
     @Body() dto: UpdateUserDto,
   ) {
+    try {
+      this._logger.log(`Update user with id: ${userId}`);
+      const user = await this._tryUpdateUser(userId, dto);
+      this._logger.log(`User with id: ${userId} successfully updated`);
+
+      return {
+        user,
+        message: UserMessageConstants.SUCCESS_UPDATE,
+      };
+    } catch (error) {
+      this._logger.warn(
+        `Error while updating user with id: ${userId}. Error message: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  private async _tryGetUser(userId: string) {
+    const user = await this._userService.getById(userId);
+
+    return user;
+  }
+
+  private async _tryUpdateUser(userId: string, dto: UpdateUserDto) {
     const { password, ...user } = await this._userService.update(userId, dto);
 
-    return {
-      user,
-      message: UserMessageConstants.SUCCESS_UPDATE,
-    };
+    return user;
   }
 }
