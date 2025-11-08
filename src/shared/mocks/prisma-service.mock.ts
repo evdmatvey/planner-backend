@@ -1,3 +1,5 @@
+// TODO: Remove shared prismaServiceMock (#29)
+
 export const mockPrismaService = {
   user: {
     findUnique: jest.fn(),

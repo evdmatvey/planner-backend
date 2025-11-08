@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MessageResponse } from '@/shared/swagger-types/message-response';
 
+// TODO: move from types to swagger folder (#26)
+
 export class UserResponse {
   @ApiProperty({ example: 'cm5m0v1tt0000iob8oiy0txly' })
   id: string;

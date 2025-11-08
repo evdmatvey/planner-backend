@@ -12,6 +12,7 @@ import { TagModule } from './tag';
 import { TaskModule } from './task';
 import { UserModule } from './user';
 
+// TODO: remove Prometheus metrics (#24)
 @Module({
   imports: [
     ConfigModule.forRoot({
