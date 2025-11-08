@@ -3,6 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FinancesCategoryRepository } from '../finances-category.repository';
 import { FinancesCategoryService } from '../finances-category.service';
 
+// TODO: improve tests quality (#27)
+
 // Mock DTOs
 class CreateFinancesCategoryDto {}
 class UpdateFinancesCategoryDto {}

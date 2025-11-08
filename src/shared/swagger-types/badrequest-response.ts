@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+// TODO: Move to /shared/lib/swagger (#28)
+
 export class BadRequestResponse {
   @ApiProperty({
     example: ['Ошибка валидации'],

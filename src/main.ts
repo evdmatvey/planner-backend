@@ -22,6 +22,7 @@ async function bootstrap() {
     exposedHeaders: ['set-cookie'],
   });
 
+  // TODO: remove from production mode (#23)
   const config = new DocumentBuilder()
     .setTitle('Planner API')
     .setVersion('1.2.0')

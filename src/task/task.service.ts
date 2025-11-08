@@ -4,6 +4,8 @@ import { TaskMessageConstants } from './constants/task-message.constants';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
+// TODO: Move ORM logic to repository (#30)
+
 @Injectable()
 export class TaskService {
   public constructor(private readonly _prisma: PrismaService) {}
