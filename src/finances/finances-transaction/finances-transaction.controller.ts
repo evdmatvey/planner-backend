@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Logger,
   Param,
   Post,
   Put,
@@ -45,7 +44,6 @@ import {
 export class FinancesTransactionController {
   public constructor(
     private readonly _financesTransactionService: FinancesTransactionService,
-    private readonly _logger: Logger,
   ) {}
 
   @Post()
@@ -71,22 +69,15 @@ export class FinancesTransactionController {
     @UseUser('id') userId: string,
     @Body() dto: CreateFinanceTransactionDto,
   ) {
-    try {
-      this._logger.log(`Creating transaction for user ${userId}`);
-      const transaction = await this._tryCreate(userId, dto);
-      this._logger.log(
-        `Transaction ${transaction.id} created by user ${userId}`,
-      );
+    const transaction = await this._financesTransactionService.create(
+      userId,
+      dto,
+    );
 
-      return {
-        transaction,
-        message: transactionResponseMessageBuilder(transaction.label, 'create'),
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while creating transaction for user ${userId}. Error message: ${error.message}`,
-      );
-    }
+    return {
+      transaction,
+      message: transactionResponseMessageBuilder(transaction.label, 'create'),
+    };
   }
 
   @Get()
@@ -141,27 +132,13 @@ export class FinancesTransactionController {
   ) {
     const pagedRequest: PagedRequest = { page: +page, pageSize: +limit };
 
-    try {
-      this._logger.log(
-        `Getting transactions for user ${userId} with paged request ${JSON.stringify(pagedRequest)}`,
-      );
-      const transactions = await this._tryGetPaged(
-        userId,
+    const transactions =
+      await this._financesTransactionService.getAllByFiltersPaged(
         pagedRequest,
-        categoryId,
-        type,
-      );
-      this._logger.log(
-        `Transactions for user ${userId} received with paged request ${JSON.stringify(pagedRequest)}`,
+        { userId, categoryId, type },
       );
 
-      return transactions;
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting transactions for user ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return transactions;
   }
 
   @Get('/:id')
@@ -187,22 +164,13 @@ export class FinancesTransactionController {
     @UseUser('id') userId: string,
     @Param('id') financesTransactionId: string,
   ) {
-    try {
-      this._logger.log(
-        `Getting transaction with id: ${financesTransactionId} for user ${userId}`,
-      );
-      const transaction = await this._tryGetOne(userId, financesTransactionId);
-      this._logger.log(
-        `Transaction with id: ${financesTransactionId} for user ${userId} received`,
+    const transaction =
+      await this._financesTransactionService.getOneWithMeanAndDeviation(
+        userId,
+        financesTransactionId,
       );
 
-      return transaction;
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting transaction with id: ${financesTransactionId} for user ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return transaction;
   }
 
   @Put('/:id')
@@ -233,29 +201,16 @@ export class FinancesTransactionController {
     @Param('id') financesTransactionId: string,
     @Body() dto: UpdateFinanceTransactionDto,
   ) {
-    try {
-      this._logger.log(
-        `Updating transaction with id: ${financesTransactionId} for user ${userId}`,
-      );
-      const transaction = await this._tryUpdate(
-        userId,
-        financesTransactionId,
-        dto,
-      );
-      this._logger.log(
-        `Transaction with id: ${financesTransactionId} for user ${userId} updated`,
-      );
+    const transaction = await this._financesTransactionService.update(
+      userId,
+      financesTransactionId,
+      dto,
+    );
 
-      return {
-        transaction,
-        message: transactionResponseMessageBuilder(transaction.label, 'update'),
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while updating transaction with id: ${financesTransactionId} for user ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      transaction,
+      message: transactionResponseMessageBuilder(transaction.label, 'update'),
+    };
   }
 
   @Delete('/:id')
@@ -281,78 +236,11 @@ export class FinancesTransactionController {
     @UseUser('id') userId: string,
     @Param('id') financesTransactionId: string,
   ) {
-    try {
-      this._logger.log(
-        `Deleting transaction with id: ${financesTransactionId} for user ${userId}`,
-      );
-      const { label } = await this._tryDelete(userId, financesTransactionId);
-      this._logger.log(
-        `Transaction with id: ${financesTransactionId} for user ${userId} deleted`,
-      );
-
-      return { message: transactionResponseMessageBuilder(label, 'delete') };
-    } catch (error) {
-      this._logger.warn(
-        `Error while deleting transaction with id: ${financesTransactionId} for user ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  private async _tryCreate(userId: string, dto: CreateFinanceTransactionDto) {
-    const transaction = await this._financesTransactionService.create(
-      userId,
-      dto,
-    );
-
-    return transaction;
-  }
-
-  private async _tryGetPaged(
-    userId: string,
-    pagedRequest: PagedRequest,
-    categoryId?: string,
-    type?: FinancesTransactionType,
-  ) {
-    const transactions =
-      await this._financesTransactionService.getAllByFiltersPaged(
-        pagedRequest,
-        { userId, categoryId, type },
-      );
-
-    return transactions;
-  }
-
-  private async _tryGetOne(userId: string, financesTransactionId: string) {
-    const transaction =
-      await this._financesTransactionService.getOneWithMeanAndDeviation(
-        userId,
-        financesTransactionId,
-      );
-
-    return transaction;
-  }
-
-  private async _tryUpdate(
-    userId: string,
-    financesTransactionId: string,
-    dto: UpdateFinanceTransactionDto,
-  ) {
-    const transaction = await this._financesTransactionService.update(
-      userId,
-      financesTransactionId,
-      dto,
-    );
-
-    return transaction;
-  }
-
-  private async _tryDelete(userId: string, financesTransactionId: string) {
-    const transaction = await this._financesTransactionService.delete(
+    const { label } = await this._financesTransactionService.delete(
       userId,
       financesTransactionId,
     );
 
-    return transaction;
+    return { message: transactionResponseMessageBuilder(label, 'delete') };
   }
 }
