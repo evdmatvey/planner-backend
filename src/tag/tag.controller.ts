@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Logger,
   Param,
   Post,
   Put,
@@ -38,10 +37,7 @@ import {
 @UsePipes(new ValidationPipe())
 @Controller('tags')
 export class TagController {
-  public constructor(
-    private readonly _tagService: TagService,
-    private readonly _logger: Logger,
-  ) {}
+  public constructor(private readonly _tagService: TagService) {}
 
   @Get()
   @HttpCode(200)
@@ -59,20 +55,9 @@ export class TagController {
     },
   })
   public async getAll(@UseUser('id') userId: string) {
-    try {
-      this._logger.log(`Get all tags for user with id: ${userId}`);
-      const tags = await this._tryGetTags(userId);
-      this._logger.log(
-        `Tags for user with id: ${userId} successfully received`,
-      );
+    const tags = await this._tagService.getAll(userId);
 
-      return { tags };
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting tags for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return { tags };
   }
 
   @Get(':id')
@@ -92,22 +77,11 @@ export class TagController {
   })
   public async getOne(
     @UseUser('id') userId: string,
-    @Param('id') taskId: string,
+    @Param('id') tagId: string,
   ) {
-    try {
-      this._logger.log(
-        `Get tag with id: ${taskId} for user with id: ${userId}`,
-      );
-      const tag = await this._tryGetTag(userId, taskId);
-      this._logger.log(`Tag with id: ${taskId} successfully received`);
+    const tag = await this._tagService.getById(userId, tagId);
 
-      return { tag };
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting tag with id: ${taskId} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return { tag };
   }
 
   @Post()
@@ -133,25 +107,12 @@ export class TagController {
     @UseUser('id') userId: string,
     @Body() dto: CreateTagDto,
   ) {
-    try {
-      this._logger.log(
-        `Create tag for user with id: ${userId} with title: ${dto.title}`,
-      );
-      const tag = await this._tryCreateTag(userId, dto);
-      this._logger.log(
-        `Tag with id: ${tag.id} successfully created for user with id: ${userId}`,
-      );
+    const tag = await this._tagService.create(userId, dto);
 
-      return {
-        tag,
-        message: TagMessageConstants.SUCCESS_CREATE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while creating tag for user with id: ${userId} with title: ${dto.title}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      tag,
+      message: TagMessageConstants.SUCCESS_CREATE,
+    };
   }
 
   @Put(':id')
@@ -178,25 +139,12 @@ export class TagController {
     @Param('id') tagId: string,
     @Body() dto: UpdateTagDto,
   ) {
-    try {
-      this._logger.log(
-        `Update tag with id: ${tagId} for user with id: ${userId} with title: ${dto.title}`,
-      );
-      const tag = await this._tryUpdateTag(userId, tagId, dto);
-      this._logger.log(
-        `Tag with id: ${tag.id} successfully updated for user with id: ${userId}`,
-      );
+    const tag = await this._tagService.update(userId, tagId, dto);
 
-      return {
-        tag,
-        message: TagMessageConstants.SUCCESS_UPDATE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while updating tag with id: ${tagId} for user with id: ${userId} with title: ${dto.title}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      tag,
+      message: TagMessageConstants.SUCCESS_UPDATE,
+    };
   }
 
   @Delete(':id')
@@ -218,58 +166,11 @@ export class TagController {
     @UseUser('id') userId: string,
     @Param('id') tagId: string,
   ) {
-    try {
-      this._logger.log(
-        `Delete tag with id: ${tagId} for user with id: ${userId}`,
-      );
-      const tag = await this._tryDeleteTag(userId, tagId);
-      this._logger.log(
-        `Tag with id: ${tag.id} successfully deleted for user with id: ${userId}`,
-      );
-
-      return {
-        tag,
-        message: TagMessageConstants.SUCCESS_DELETE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while deleting tag with id: ${tagId} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  private async _tryGetTags(userId: string) {
-    const tags = await this._tagService.getAll(userId);
-
-    return tags;
-  }
-
-  private async _tryGetTag(userId: string, tagId: string) {
-    const tag = await this._tagService.getById(userId, tagId);
-
-    return tag;
-  }
-
-  private async _tryCreateTag(userId: string, dto: CreateTagDto) {
-    const tag = await this._tagService.create(userId, dto);
-
-    return tag;
-  }
-
-  private async _tryUpdateTag(
-    userId: string,
-    tagId: string,
-    dto: UpdateTagDto,
-  ) {
-    const tag = await this._tagService.update(userId, tagId, dto);
-
-    return tag;
-  }
-
-  private async _tryDeleteTag(userId: string, tagId: string) {
     const tag = await this._tagService.delete(userId, tagId);
 
-    return tag;
+    return {
+      tag,
+      message: TagMessageConstants.SUCCESS_DELETE,
+    };
   }
 }
