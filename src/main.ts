@@ -11,6 +11,9 @@ async function bootstrap() {
 
   const PORT = configService.getOrThrow<number>('APPLICATION_PORT');
   const HOST = configService.getOrThrow<number>('APPLICATION_HOST');
+  const MODE = configService.getOrThrow<string>('NODE_ENV');
+
+  const isDev = MODE === 'development';
 
   app.useGlobalFilters(new InternalServerErrorFilter());
 
@@ -22,19 +25,20 @@ async function bootstrap() {
     exposedHeaders: ['set-cookie'],
   });
 
-  // TODO: remove from production mode (#23)
-  const config = new DocumentBuilder()
-    .setTitle('Planner API')
-    .setVersion('1.2.0')
-    .setDescription('API для приложения по планированию Planner')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+  if (isDev) {
+    const config = new DocumentBuilder()
+      .setTitle('Planner API')
+      .setVersion('1.2.0')
+      .setDescription('API для приложения по планированию Planner')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('swagger', app, document);
+  }
 
   await app.listen(PORT, () => {
     console.log(`API url: http://${HOST}:${PORT}/api`);
-    console.log(`SWAGGER url: http://${HOST}:${PORT}/swagger`);
+    if (isDev) console.log(`SWAGGER url: http://${HOST}:${PORT}/swagger`);
   });
 }
 bootstrap();
