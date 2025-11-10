@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as CookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { InternalServerErrorFilter } from './shared/lib/internal-server-error-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,8 +13,6 @@ async function bootstrap() {
   const MODE = configService.getOrThrow<string>('NODE_ENV');
 
   const isDev = MODE === 'development';
-
-  app.useGlobalFilters(new InternalServerErrorFilter());
 
   app.setGlobalPrefix('api');
   app.use(CookieParser());

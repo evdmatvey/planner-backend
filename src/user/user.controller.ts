@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  Logger,
   Put,
   UsePipes,
   ValidationPipe,
@@ -41,10 +40,7 @@ import { removePasswordFromUser } from './utils/remove-password-from-user.util';
 @UsePipes(new ValidationPipe())
 @Controller('user/profile')
 export class UserController {
-  constructor(
-    private readonly _userService: UserService,
-    private readonly _logger: Logger,
-  ) {}
+  constructor(private readonly _userService: UserService) {}
 
   @Get()
   @HttpCode(200)
@@ -58,18 +54,9 @@ export class UserController {
     description: unauthorizedResponseDescription,
   })
   public async getProfile(@UseUser('id') userId: string) {
-    try {
-      this._logger.log(`Get user with id: ${userId}`);
-      const user = await this._tryGetUser(userId);
-      this._logger.log(`User with id: ${userId} successfully received`);
+    const user = await this._userService.getById(userId);
 
-      return removePasswordFromUser(user);
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return removePasswordFromUser(user);
   }
 
   @Put()
@@ -91,32 +78,11 @@ export class UserController {
     @UseUser('id') userId: string,
     @Body() dto: UpdateUserDto,
   ) {
-    try {
-      this._logger.log(`Update user with id: ${userId}`);
-      const user = await this._tryUpdateUser(userId, dto);
-      this._logger.log(`User with id: ${userId} successfully updated`);
+    const user = await this._userService.update(userId, dto);
 
-      return {
-        user,
-        message: UserMessageConstants.SUCCESS_UPDATE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while updating user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  private async _tryGetUser(userId: string) {
-    const user = await this._userService.getById(userId);
-
-    return user;
-  }
-
-  private async _tryUpdateUser(userId: string, dto: UpdateUserDto) {
-    const { password, ...user } = await this._userService.update(userId, dto);
-
-    return user;
+    return {
+      user: removePasswordFromUser(user),
+      message: UserMessageConstants.SUCCESS_UPDATE,
+    };
   }
 }
