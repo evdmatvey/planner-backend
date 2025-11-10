@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   HttpCode,
-  Logger,
   Post,
   Req,
   Res,
@@ -29,7 +28,6 @@ import {
   AuthLoginUnauthorizedResponse,
   AuthOkResponse,
   AuthOkResponseWithMessage,
-  AuthResult,
   AuthUnauthorizedResponse,
 } from './types';
 
@@ -40,7 +38,6 @@ export class AuthController {
   constructor(
     private readonly _authService: AuthService,
     private readonly _tokenService: TokenService,
-    private readonly _logger: Logger,
   ) {}
 
   @Post('login')
@@ -67,22 +64,18 @@ export class AuthController {
     @Body() body: LoginBody,
     @Res({ passthrough: true }) res: Response,
   ) {
-    try {
-      this._logger.log(`Login user with email: ${body.email}`);
-      const { user, accessToken } = await this._tryLogin(body, res);
-      this._logger.log(`User with email: ${user.email} logged in`);
+    const dto = this._removeCaptchaTokenFromBody(body) as LoginDto;
+    const user = await this._authService.login(dto);
+    const { refreshToken, accessToken } = this._tokenService.createTokens(
+      user.id,
+    );
+    this._tokenService.addRefreshTokenToResponse(res, refreshToken);
 
-      return {
-        user,
-        accessToken,
-        message: AuthMessageConstants.SUCCESS_LOGIN,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Login user with email: ${body.email} failed — ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      user,
+      accessToken,
+      message: AuthMessageConstants.SUCCESS_LOGIN,
+    };
   }
 
   @Post('register')
@@ -114,22 +107,19 @@ export class AuthController {
     @Body() body: RegisterBody,
     @Res({ passthrough: true }) res: Response,
   ) {
-    try {
-      this._logger.log(`Register user with email: ${body.email}`);
-      const { user, accessToken } = await this._tryRegister(body, res);
-      this._logger.log(`User with email: ${user.email} registered`);
+    const dto = this._removeCaptchaTokenFromBody(body) as RegisterDto;
+    const user = await this._authService.register(dto);
+    const { accessToken, refreshToken } = this._tokenService.createTokens(
+      user.id,
+    );
 
-      return {
-        user,
-        accessToken,
-        message: AuthMessageConstants.SUCCESS_REGISTER,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Register user with email: ${body.email} failed — ${error.message}`,
-      );
-      throw error;
-    }
+    this._tokenService.addRefreshTokenToResponse(res, refreshToken);
+
+    return {
+      user,
+      accessToken,
+      message: AuthMessageConstants.SUCCESS_REGISTER,
+    };
   }
 
   @Post('logout')
@@ -144,18 +134,11 @@ export class AuthController {
     },
   })
   public async logout(@Res({ passthrough: true }) res: Response) {
-    try {
-      this._logger.log('Logout user');
-      this._tryLogout(res);
-      this._logger.log('User logged out');
+    this._tokenService.removeRefreshTokenFromResponse(res);
 
-      return {
-        message: AuthMessageConstants.SUCCESS_LOGOUT,
-      };
-    } catch (error) {
-      this._logger.warn(`Logout failed — ${error.message}`);
-      throw error;
-    }
+    return {
+      message: AuthMessageConstants.SUCCESS_LOGOUT,
+    };
   }
 
   @Post('login/access-token')
@@ -181,55 +164,6 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    try {
-      this._logger.log('Get new access token');
-      const { user, accessToken } = await this._tryGetNewToken(req, res);
-      this._logger.log('New access token obtained');
-
-      return { user, accessToken };
-    } catch (error) {
-      this._logger.warn(`Get new access token failed — ${error.message}`);
-      throw error;
-    }
-  }
-
-  private async _tryLogin(
-    body: LoginBody,
-    res: Response,
-  ): Promise<{ user: AuthResult; accessToken: string }> {
-    const dto = this._removeCaptchaTokenFromBody(body) as LoginDto;
-    const user = await this._authService.login(dto);
-    const { refreshToken, accessToken } = this._tokenService.createTokens(
-      user.id,
-    );
-    this._tokenService.addRefreshTokenToResponse(res, refreshToken);
-
-    return { user, accessToken };
-  }
-
-  private async _tryRegister(
-    body: RegisterBody,
-    res: Response,
-  ): Promise<{ user: AuthResult; accessToken: string }> {
-    const dto = this._removeCaptchaTokenFromBody(body) as RegisterDto;
-    const user = await this._authService.register(dto);
-    const { accessToken, refreshToken } = this._tokenService.createTokens(
-      user.id,
-    );
-
-    this._tokenService.addRefreshTokenToResponse(res, refreshToken);
-
-    return { user, accessToken };
-  }
-
-  private _tryLogout(res: Response): void {
-    this._tokenService.removeRefreshTokenFromResponse(res);
-  }
-
-  private async _tryGetNewToken(
-    req: Request,
-    res: Response,
-  ): Promise<{ user: AuthResult; accessToken: string }> {
     const refreshTokenFromCookies =
       this._tokenService.getRefreshTokenFromRequest(req, res);
 
