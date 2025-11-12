@@ -7,9 +7,13 @@ import {
   MinLength,
 } from 'class-validator';
 import { UserValidationConstants } from '../constants/user-validation.constants';
+import { UserDtoDescriptionConstants } from '../swagger';
 
 export class UpdateUserDto {
-  @ApiProperty({ example: 'name' })
+  @ApiProperty({
+    example: 'name',
+    description: UserDtoDescriptionConstants.NAME,
+  })
   @IsNotEmpty({ message: UserValidationConstants.EMPTY_NAME })
   @IsString({ message: UserValidationConstants.IS_STRING_NAME })
   @MinLength(UserValidationConstants.MIN_NAME, {
@@ -18,7 +22,10 @@ export class UpdateUserDto {
   name: string;
 
   @IsOptional()
-  @ApiProperty({ example: '123456' })
+  @ApiProperty({
+    example: '123456',
+    description: UserDtoDescriptionConstants.PASSWORD,
+  })
   @IsNotEmpty({ message: UserValidationConstants.EMPTY_PASSWORD })
   @IsString({ message: UserValidationConstants.IS_STRING_PASSWORD })
   @MinLength(UserValidationConstants.MIN_PASSWORD, {
@@ -26,7 +33,10 @@ export class UpdateUserDto {
   })
   password?: string;
 
-  @ApiProperty({ example: 'test@test.test' })
+  @ApiProperty({
+    example: 'test@test.test',
+    description: UserDtoDescriptionConstants.EMAIL,
+  })
   @IsNotEmpty({ message: UserValidationConstants.EMPTY_EMAIL })
   @IsString({ message: UserValidationConstants.IS_STRING_EMAIL })
   @IsEmail({}, { message: UserValidationConstants.INCORRECT_EMAIL })
