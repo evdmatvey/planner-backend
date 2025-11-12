@@ -25,11 +25,13 @@ import {
 import { TagMessageConstants } from './constants/tag-message.constants';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { TagService } from './tag.service';
 import {
   TagResponse,
+  TagRouteConstants,
+  TagSummaryConstants,
   TagWithMessageResponse,
-} from './types/tag-response.types';
+} from './swagger';
+import { TagService } from './tag.service';
 
 @Auth()
 @ApiBearerAuth()
@@ -42,11 +44,11 @@ export class TagController {
   @Get()
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение тегов',
+    summary: TagSummaryConstants.GET_ALL,
     apiResponses: {
       ok: {
         type: TagResponse,
-        description: 'Теги успешно получены',
+        description: TagRouteConstants.GET_ALL.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -63,11 +65,11 @@ export class TagController {
   @Get(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение тега по id',
+    summary: TagSummaryConstants.GET_ONE,
     apiResponses: {
       ok: {
         type: TagResponse,
-        description: 'Тег успешно получен',
+        description: TagRouteConstants.GET_ONE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -87,11 +89,11 @@ export class TagController {
   @Post()
   @HttpCode(201)
   @ApiRouteDocs({
-    summary: 'Создание тега',
+    summary: TagSummaryConstants.CREATE,
     apiResponses: {
       ok: {
         type: TagWithMessageResponse,
-        description: 'Тег успешно создан',
+        description: TagRouteConstants.CREATE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -118,11 +120,11 @@ export class TagController {
   @Put(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Обновление тега',
+    summary: TagSummaryConstants.UPDATE,
     apiResponses: {
       ok: {
         type: TagWithMessageResponse,
-        description: 'Тег успешно обновлен',
+        description: TagRouteConstants.UPDATE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -150,11 +152,11 @@ export class TagController {
   @Delete(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Удаление тега',
+    summary: TagSummaryConstants.DELETE,
     apiResponses: {
       ok: {
         type: TagWithMessageResponse,
-        description: 'Тег успешно удален',
+        description: TagRouteConstants.DELETE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
