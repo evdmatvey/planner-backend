@@ -1,29 +1,47 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Color, Priority } from '@prisma/__generated__';
-import { BadRequestResponse } from '@/shared/swagger-types/badrequest-response';
 import { MessageResponse } from '@/shared/swagger-types/message-response';
-import { TaskMessageConstants } from '../constants/task-message.constants';
+import { TaskDtoDescriptionConstants } from './constants';
 
 export class TaskResponse {
   @ApiProperty({ example: 'cm5m0v1tt0000iob8oiy0txly' })
   id: string;
 
-  @ApiProperty({ example: 'Задача 1' })
+  @ApiProperty({
+    example: 'Задача 1',
+    description: TaskDtoDescriptionConstants.TITLE,
+  })
   title: string;
 
-  @ApiProperty({ example: 'описание задачи 1' })
+  @ApiProperty({
+    example: 'описание задачи 1',
+    description: TaskDtoDescriptionConstants.DESCRIPTION,
+  })
   description: string;
 
-  @ApiProperty({ example: Priority.LOW, enum: Priority })
+  @ApiProperty({
+    example: Priority.LOW,
+    enum: Priority,
+    description: TaskDtoDescriptionConstants.PRIORITY,
+  })
   priority: Priority;
 
-  @ApiProperty({ example: 60 })
+  @ApiProperty({
+    example: 60,
+    description: TaskDtoDescriptionConstants.EXECUTION_TIME,
+  })
   executionTime: number;
 
-  @ApiProperty({ example: false })
+  @ApiProperty({
+    example: false,
+    description: TaskDtoDescriptionConstants.IS_COMPLETED,
+  })
   isCompleted: false;
 
-  @ApiProperty({ example: '2025-01-13T05:52:25.460Z' })
+  @ApiProperty({
+    example: '2025-01-13T05:52:25.460Z',
+    description: TaskDtoDescriptionConstants.CREATED_AT,
+  })
   createdAt: string;
 
   @ApiProperty({ example: '2025-01-13T05:52:25.460Z' })
@@ -51,11 +69,4 @@ export class TaskWithTagsAndMessageResponse extends MessageResponse {
 export class TaskWithMessageResponse extends MessageResponse {
   @ApiProperty({ type: TaskResponse })
   task: TaskResponse;
-}
-
-export class ToggleTaskStateBadRequestResponse extends BadRequestResponse {
-  @ApiProperty({
-    example: TaskMessageConstants.INCORRECT_TASK_STATE,
-  })
-  message: string[];
 }
