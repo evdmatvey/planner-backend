@@ -1,16 +1,26 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Priority, Task } from '@prisma/__generated__';
-import { mockPrismaService } from '@/shared/mocks/prisma-service.mock';
 import { PrismaService } from '@/shared/services/prisma.service';
 import { TaskMessageConstants } from './constants/task-message.constants';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskService } from './task.service';
 
+const mockTaskPrismaService = {
+  task: {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findFirst: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+};
+
 describe('TaskService', () => {
   let service: TaskService;
-  let prismaService: typeof mockPrismaService;
+  let prismaService: typeof mockTaskPrismaService;
   let userId: string;
   let taskId: string;
   let task: Task;
@@ -19,12 +29,12 @@ describe('TaskService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TaskService,
-        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: PrismaService, useValue: mockTaskPrismaService },
       ],
     }).compile();
 
     service = module.get<TaskService>(TaskService);
-    prismaService = module.get<typeof mockPrismaService>(PrismaService);
+    prismaService = module.get<typeof mockTaskPrismaService>(PrismaService);
     userId = 'user-id';
     taskId = 'task-id';
     task = {
@@ -151,7 +161,7 @@ describe('TaskService', () => {
         tags: [],
       };
 
-      mockPrismaService.task.findUnique.mockResolvedValue({
+      prismaService.task.findUnique.mockResolvedValue({
         ...task,
         tags: [],
       });
@@ -186,8 +196,8 @@ describe('TaskService', () => {
 
   describe('toggleIsCompleted', () => {
     it('should toggle isCompleted to true', async () => {
-      mockPrismaService.task.findUnique.mockResolvedValue(task);
-      mockPrismaService.task.update.mockResolvedValue({
+      prismaService.task.findUnique.mockResolvedValue(task);
+      prismaService.task.update.mockResolvedValue({
         ...task,
         isCompleted: !task.isCompleted,
       });
@@ -198,7 +208,7 @@ describe('TaskService', () => {
     });
 
     it('should throw error if task not found', async () => {
-      mockPrismaService.task.findUnique.mockResolvedValue(null);
+      prismaService.task.findUnique.mockResolvedValue(null);
 
       expect(service.toggleIsCompleted(userId, taskId)).rejects.toThrow(
         TaskMessageConstants.TASK_NOT_FOUND,

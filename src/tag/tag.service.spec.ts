@@ -1,14 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Color, Tag } from '@prisma/__generated__';
-import { mockPrismaService } from '@/shared/mocks/prisma-service.mock';
 import { PrismaService } from '@/shared/services/prisma.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { TagService } from './tag.service';
 
+const mockTagPrismaService = {
+  tag: {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findFirst: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+};
+
 describe('TagService', () => {
   let service: TagService;
-  let prismaService: typeof mockPrismaService;
+  let prismaService: typeof mockTagPrismaService;
   let userId: string;
   let tagId: string;
   let tag: Tag;
@@ -17,12 +27,12 @@ describe('TagService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TagService,
-        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: PrismaService, useValue: mockTagPrismaService },
       ],
     }).compile();
 
     service = module.get<TagService>(TagService);
-    prismaService = module.get<typeof mockPrismaService>(PrismaService);
+    prismaService = module.get<typeof mockTagPrismaService>(PrismaService);
     userId = 'user-id';
     tagId = 'tag-id';
     tag = {
