@@ -29,7 +29,8 @@ import {
   AuthOkResponse,
   AuthOkResponseWithMessage,
   AuthUnauthorizedResponse,
-} from './types';
+} from './swagger';
+import { AuthRouteConstants, AuthSummaryConstants } from './swagger/constants';
 
 @ApiTags('Авторизация')
 @UsePipes(new ValidationPipe())
@@ -44,7 +45,7 @@ export class AuthController {
   @HttpCode(200)
   @Turnstile()
   @ApiRouteDocs({
-    summary: 'Авторизация',
+    summary: AuthSummaryConstants.LOGIN,
     apiResponses: {
       badRequest: {
         type: BadRequestResponse,
@@ -52,11 +53,11 @@ export class AuthController {
       },
       ok: {
         type: AuthOkResponseWithMessage,
-        description: 'Успешно авторизован',
+        description: AuthRouteConstants.LOGIN.OK,
       },
       unauthorized: {
         type: AuthLoginUnauthorizedResponse,
-        description: 'Неверный логин или пароль',
+        description: AuthRouteConstants.LOGIN.UNAUTHORIZED,
       },
     },
   })
@@ -82,7 +83,7 @@ export class AuthController {
   @HttpCode(201)
   @Turnstile()
   @ApiRouteDocs({
-    summary: 'Регистрация',
+    summary: AuthSummaryConstants.REGISTER,
     apiResponses: {
       badRequest: {
         type: BadRequestResponse,
@@ -90,16 +91,11 @@ export class AuthController {
       },
       ok: {
         type: AuthOkResponseWithMessage,
-        description: 'Аккаунт успешно создан',
-      },
-      unauthorized: {
-        type: AuthLoginUnauthorizedResponse,
-        description: 'Неверный логин или пароль',
+        description: AuthRouteConstants.REGISTER.OK,
       },
       conflict: {
         type: ConflictResponse,
-        description:
-          'Регистрация требует уникальный email. Не должно быть пользователей с одинаковым email',
+        description: AuthRouteConstants.REGISTER.CONFLICT,
       },
     },
   })
@@ -125,11 +121,11 @@ export class AuthController {
   @Post('logout')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Выход из системы',
+    summary: AuthSummaryConstants.LOGOUT,
     apiResponses: {
       ok: {
         type: MessageResponse,
-        description: 'Успешный выход из системы',
+        description: AuthRouteConstants.LOGOUT.OK,
       },
     },
   })
@@ -144,19 +140,19 @@ export class AuthController {
   @Post('login/access-token')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение нового access токена по refresh',
+    summary: AuthSummaryConstants.GET_NEW_TOKEN,
     apiResponses: {
       ok: {
         type: AuthOkResponse,
-        description: 'Токены успешно обновлены',
+        description: AuthRouteConstants.GET_NEW_TOKEN.OK,
       },
       unauthorized: {
         type: AuthUnauthorizedResponse,
-        description: 'Неверный refresh токен',
+        description: AuthRouteConstants.GET_NEW_TOKEN.UNAUTHORIZED,
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Пользователь с id из refresh token не найден',
+        description: AuthRouteConstants.GET_NEW_TOKEN.NOT_FOUND,
       },
     },
   })

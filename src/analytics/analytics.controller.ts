@@ -9,11 +9,13 @@ import {
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
 import { AnalyticsService } from './analytics.service';
-import { AnalyticsPeriod } from './types/analytics-period.type';
 import {
+  AnalyticsRouteConstants,
+  AnalyticsSummaryConstants,
   TagAnalyticsResponse,
   TaskAnalyticsResponse,
-} from './types/analytics.response';
+} from './swagger';
+import { AnalyticsPeriod } from './types/analytics-period.type';
 
 @Auth()
 @ApiBearerAuth()
@@ -34,11 +36,13 @@ export class AnalyticsController {
     description: 'Временной период (week, month, year, all)',
   })
   @ApiOperation({
-    summary: 'Получение аналитики тегов',
-    description:
-      'Данные тегов, их задачи по датам, кол-во задач и время выполнения по статусу',
+    summary: AnalyticsSummaryConstants.GET_TAGS_ANALYTICS,
   })
-  @ApiOkResponse({ type: TagAnalyticsResponse, isArray: true })
+  @ApiOkResponse({
+    type: TagAnalyticsResponse,
+    isArray: true,
+    description: AnalyticsRouteConstants.GET_TAGS_ANALYTICS.OK,
+  })
   public async getTagsAnalytics(
     @UseUser('id') userId: string,
     @Query('tagId') tagId?: string,
@@ -64,16 +68,18 @@ export class AnalyticsController {
 
   @Get('/tasks')
   @ApiOperation({
-    summary: 'Получение аналитики задач',
-    description:
-      'Массив с датами и информацией о задачах на эту дату (выполнено, не выполнено, все)',
+    summary: AnalyticsSummaryConstants.GET_TASKS_ANALYTICS,
   })
   @ApiQuery({
     name: 'period',
     required: false,
     description: 'Временной период (week, month, year, all)',
   })
-  @ApiOkResponse({ type: TaskAnalyticsResponse, isArray: true })
+  @ApiOkResponse({
+    type: TaskAnalyticsResponse,
+    isArray: true,
+    description: AnalyticsRouteConstants.GET_TASKS_ANALYTICS.OK,
+  })
   public async getTasksAnalytics(
     @UseUser('id') userId: string,
     @Query('period') period?: AnalyticsPeriod,

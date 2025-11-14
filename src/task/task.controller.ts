@@ -14,7 +14,11 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
-import { ApiRouteDocs } from '@/shared/swagger';
+import {
+  ApiRouteDocs,
+  BadRequestResponse,
+  badRequestResponseDescription,
+} from '@/shared/swagger';
 import { NotFoundResponse } from '@/shared/swagger-types/notfound-response';
 import {
   UnauthorizedResponse,
@@ -23,12 +27,14 @@ import {
 import { TaskMessageConstants } from './constants/task-message.constants';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskService } from './task.service';
 import {
+  TaskRouteConstants,
+  TaskSummaryConstants,
   TaskWithMessageResponse,
   TaskWithTagsAndMessageResponse,
   TaskWithTagsResponse,
-} from './types/task-response.types';
+} from './swagger';
+import { TaskService } from './task.service';
 
 @Auth()
 @ApiBearerAuth()
@@ -41,11 +47,11 @@ export class TaskController {
   @Get()
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение всех задач',
+    summary: TaskSummaryConstants.GET_ALL,
     apiResponses: {
       ok: {
         type: TaskWithTagsResponse,
-        description: 'Все задачи успешно получены',
+        description: TaskRouteConstants.GET_ALL.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -62,11 +68,11 @@ export class TaskController {
   @Get(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение задачи по id',
+    summary: TaskSummaryConstants.GET_ONE,
     apiResponses: {
       ok: {
         type: TaskWithTagsResponse,
-        description: 'Задача успешно получена по id',
+        description: TaskRouteConstants.GET_ONE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -74,7 +80,7 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.GET_ONE.NOT_FOUND,
       },
     },
   })
@@ -90,15 +96,19 @@ export class TaskController {
   @Post()
   @HttpCode(201)
   @ApiRouteDocs({
-    summary: 'Создание задачи',
+    summary: TaskSummaryConstants.CREATE,
     apiResponses: {
       ok: {
         type: TaskWithTagsAndMessageResponse,
-        description: 'Задача успешно создана',
+        description: TaskRouteConstants.CREATE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
         description: unauthorizedResponseDescription,
+      },
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
       },
     },
   })
@@ -117,11 +127,11 @@ export class TaskController {
   @Put(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Обновление задачи',
+    summary: TaskSummaryConstants.UPDATE,
     apiResponses: {
       ok: {
         type: TaskWithTagsAndMessageResponse,
-        description: 'Задача успешно обновлена',
+        description: TaskRouteConstants.UPDATE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -129,7 +139,11 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.UPDATE.NOT_FOUND,
+      },
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
       },
     },
   })
@@ -149,11 +163,11 @@ export class TaskController {
   @Patch(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Переключение задача выполнена/не выполнена',
+    summary: TaskSummaryConstants.TOGGLE_COMPLETE,
     apiResponses: {
       ok: {
         type: TaskWithMessageResponse,
-        description: 'Статус задачи успешно переключен',
+        description: TaskRouteConstants.TOGGLE_COMPLETE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -161,7 +175,7 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.TOGGLE_COMPLETE.NOT_FOUND,
       },
     },
   })
@@ -182,11 +196,11 @@ export class TaskController {
   @Delete(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Удаление задачи',
+    summary: TaskSummaryConstants.DELETE,
     apiResponses: {
       ok: {
         type: TaskWithMessageResponse,
-        description: 'Задача успешно удалена',
+        description: TaskRouteConstants.DELETE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -194,7 +208,7 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.DELETE.NOT_FOUND,
       },
     },
   })

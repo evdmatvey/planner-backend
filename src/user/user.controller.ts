@@ -7,16 +7,10 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
+import { ApiRouteDocs } from '@/shared/swagger';
 import {
   BadRequestResponse,
   badRequestResponseDescription,
@@ -30,7 +24,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   UpdateUserOkResponse,
   UserResponse,
-} from './types/user-response.types';
+  UserRouteConstants,
+  UserSummaryConstants,
+} from './swagger';
 import { UserService } from './user.service';
 import { removePasswordFromUser } from './utils/remove-password-from-user.util';
 
@@ -44,14 +40,18 @@ export class UserController {
 
   @Get()
   @HttpCode(200)
-  @ApiOperation({ summary: 'Получение профиля пользователя' })
-  @ApiOkResponse({
-    type: UserResponse,
-    description: 'Пользователь успешно получен',
-  })
-  @ApiUnauthorizedResponse({
-    type: UnauthorizedResponse,
-    description: unauthorizedResponseDescription,
+  @ApiRouteDocs({
+    summary: UserSummaryConstants.GET_PROFILE,
+    apiResponses: {
+      ok: {
+        type: UserResponse,
+        description: UserRouteConstants.GET_PROFILE.OK,
+      },
+      unauthorized: {
+        type: UnauthorizedResponse,
+        description: unauthorizedResponseDescription,
+      },
+    },
   })
   public async getProfile(@UseUser('id') userId: string) {
     const user = await this._userService.getById(userId);
@@ -61,18 +61,22 @@ export class UserController {
 
   @Put()
   @HttpCode(200)
-  @ApiOperation({ summary: 'Обновление профиля пользователя' })
-  @ApiUnauthorizedResponse({
-    type: UnauthorizedResponse,
-    description: unauthorizedResponseDescription,
-  })
-  @ApiOkResponse({
-    type: UpdateUserOkResponse,
-    description: 'Профиль пользователя успешно обновлён',
-  })
-  @ApiBadRequestResponse({
-    type: BadRequestResponse,
-    description: badRequestResponseDescription,
+  @ApiRouteDocs({
+    summary: UserSummaryConstants.UPDATE,
+    apiResponses: {
+      ok: {
+        type: UpdateUserOkResponse,
+        description: UserRouteConstants.UPDATE.OK,
+      },
+      unauthorized: {
+        type: UnauthorizedResponse,
+        description: unauthorizedResponseDescription,
+      },
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
+      },
+    },
   })
   public async update(
     @UseUser('id') userId: string,

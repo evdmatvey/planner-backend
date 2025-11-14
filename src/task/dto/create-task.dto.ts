@@ -10,32 +10,49 @@ import {
   IsString,
 } from 'class-validator';
 import { TaskValidationConstants } from '../constants/task-validation.constants';
+import { TaskDtoDescriptionConstants } from '../swagger';
 
 export class CreateTaskDto {
-  @ApiProperty({ example: 'Задача 1' })
+  @ApiProperty({
+    example: 'Задача 1',
+    required: true,
+    description: TaskDtoDescriptionConstants.TITLE,
+  })
   @IsString({ message: TaskValidationConstants.IS_STRING_TITLE })
   @IsNotEmpty({ message: TaskValidationConstants.EMPTY_TITLE })
   title: string;
 
-  @ApiProperty({ example: 'описание задачи 1' })
+  @ApiProperty({
+    example: 'описание задачи 1',
+    description: TaskDtoDescriptionConstants.DESCRIPTION,
+  })
   @IsOptional()
   @IsNotEmpty({ message: TaskValidationConstants.EMPTY_DESCRIPTION })
   @IsString({ message: TaskValidationConstants.IS_STRING_DESCRIPTION })
   description?: string;
 
-  @ApiProperty({ example: 60 })
+  @ApiProperty({
+    example: 60,
+    description: TaskDtoDescriptionConstants.EXECUTION_TIME,
+  })
   @IsOptional()
   @IsNotEmpty({ message: TaskValidationConstants.EMPTY_EXECUTION_TIME })
   @IsNumber({}, { message: TaskValidationConstants.IS_NUMBER_EXECUTION_TIME })
   executionTime?: number;
 
-  @ApiProperty({ example: Priority.LOW })
+  @ApiProperty({
+    example: Priority.LOW,
+    description: TaskDtoDescriptionConstants.PRIORITY,
+  })
   @IsOptional()
   @IsNotEmpty({ message: TaskValidationConstants.EMPTY_PRIORITY })
   @IsEnum(Priority, { message: TaskValidationConstants.INCORRECT_PRIORITY })
   priority?: Priority;
 
-  @ApiProperty({ example: '2025-01-07T05:20:26.369Z' })
+  @ApiProperty({
+    example: '2025-01-07T05:20:26.369Z',
+    description: TaskDtoDescriptionConstants.CREATED_AT,
+  })
   @IsOptional()
   @IsDateString({}, { message: TaskValidationConstants.INCORRECT_CREATED_AT })
   createdAt?: string;
