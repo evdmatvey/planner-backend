@@ -1,15 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { UserDtoDescriptionConstants } from '@/user';
 import { AuthValidationConstants } from '../constants/auth-validation.constants';
 
 export class LoginDto {
-  @ApiProperty({ example: 'test@test.test' })
+  @ApiProperty({
+    example: 'test@test.test',
+    required: true,
+    description: UserDtoDescriptionConstants.EMAIL,
+  })
   @IsNotEmpty({ message: AuthValidationConstants.EMPTY_EMAIL })
   @IsString({ message: AuthValidationConstants.IS_STRING_EMAIL })
   @IsEmail({}, { message: AuthValidationConstants.IS_STRING_EMAIL })
   email: string;
 
-  @ApiProperty({ example: '123456' })
+  @ApiProperty({
+    example: '123456',
+    required: true,
+    description: UserDtoDescriptionConstants.PASSWORD,
+  })
   @IsNotEmpty({ message: AuthValidationConstants.EMPTY_PASSWORD })
   @IsString({ message: AuthValidationConstants.IS_STRING_PASSWORD })
   @MinLength(AuthValidationConstants.MIN_PASSWORD, {
