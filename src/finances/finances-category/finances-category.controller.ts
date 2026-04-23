@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Logger,
   Param,
   Post,
   Put,
@@ -43,7 +42,6 @@ import {
 export class FinancesCategoryController {
   public constructor(
     private readonly _financesCategoryService: FinancesCategoryService,
-    private readonly _logger: Logger,
   ) {}
 
   @Get()
@@ -62,20 +60,9 @@ export class FinancesCategoryController {
     },
   })
   public async getAll(@UseUser('id') userId: string) {
-    try {
-      this._logger.log(`Get all categories for user with id: ${userId}`);
-      const categories = await this._tryGetAll(userId);
-      this._logger.log(
-        `Categories for user with id: ${userId} successfully received`,
-      );
+    const categories = await this._financesCategoryService.getAll(userId);
 
-      return { categories };
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting all categories for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return { categories };
   }
 
   @Get(':id')
@@ -98,22 +85,9 @@ export class FinancesCategoryController {
     },
   })
   public async getOne(@UseUser('id') userId: string, @Param('id') id: string) {
-    try {
-      this._logger.log(
-        `Get category with id: ${id} for user with id: ${userId}`,
-      );
-      const category = await this._tryGetOne(userId, id);
-      this._logger.log(
-        `Category with id: ${id} for user with id: ${userId} successfully received`,
-      );
+    const category = await this._financesCategoryService.getById(id, userId);
 
-      return { category };
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting category with id: ${id} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return { category };
   }
 
   @Post()
@@ -139,28 +113,12 @@ export class FinancesCategoryController {
     @UseUser('id') userId: string,
     @Body() dto: CreateFinancesCategoryDto,
   ) {
-    try {
-      this._logger.log(
-        `Create category for user with id: ${userId} with title: ${dto.title}`,
-      );
-      const category = await this._tryCreate(userId, dto);
-      this._logger.log(
-        `Category for user with id: ${userId} successfully created`,
-      );
+    const category = await this._financesCategoryService.create(userId, dto);
 
-      return {
-        category,
-        message: financesCategoryResponseMessageBuilder(
-          category.title,
-          'create',
-        ),
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while creating category for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      category,
+      message: financesCategoryResponseMessageBuilder(category.title, 'create'),
+    };
   }
 
   @Put(':id')
@@ -191,28 +149,16 @@ export class FinancesCategoryController {
     @Param('id') id: string,
     @Body() dto: UpdateFinancesCategoryDto,
   ) {
-    try {
-      this._logger.log(
-        `Update category with id: ${id} for user with id: ${userId}`,
-      );
-      const category = await this._tryUpdate(id, userId, dto);
-      this._logger.log(
-        `Category with id: ${id} for user with id: ${userId} successfully updated`,
-      );
+    const category = await this._financesCategoryService.update(
+      id,
+      userId,
+      dto,
+    );
 
-      return {
-        category,
-        message: financesCategoryResponseMessageBuilder(
-          category.title,
-          'update',
-        ),
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while updating category with id: ${id} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      category,
+      message: financesCategoryResponseMessageBuilder(category.title, 'update'),
+    };
   }
 
   @Delete(':id')
@@ -235,64 +181,10 @@ export class FinancesCategoryController {
     },
   })
   public async delete(@UseUser('id') userId: string, @Param('id') id: string) {
-    try {
-      this._logger.log(
-        `Delete category with id: ${id} for user with id: ${userId}`,
-      );
-      const category = await this._tryDelete(userId, id);
-      this._logger.log(
-        `Category with id: ${id} for user with id: ${userId} successfully deleted`,
-      );
-
-      return {
-        message: financesCategoryResponseMessageBuilder(
-          category.title,
-          'delete',
-        ),
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while deleting category with id: ${id} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  private async _tryGetAll(userId: string) {
-    const categories = await this._financesCategoryService.getAll(userId);
-
-    return categories;
-  }
-
-  private async _tryGetOne(userId: string, id: string) {
-    const category = await this._financesCategoryService.getById(id, userId);
-
-    return category;
-  }
-
-  private async _tryCreate(userId: string, dto: CreateFinancesCategoryDto) {
-    const category = await this._financesCategoryService.create(userId, dto);
-
-    return category;
-  }
-
-  private async _tryUpdate(
-    id: string,
-    userId: string,
-    dto: UpdateFinancesCategoryDto,
-  ) {
-    const category = await this._financesCategoryService.update(
-      id,
-      userId,
-      dto,
-    );
-
-    return category;
-  }
-
-  private async _tryDelete(userId: string, id: string) {
     const category = await this._financesCategoryService.delete(id, userId);
 
-    return category;
+    return {
+      message: financesCategoryResponseMessageBuilder(category.title, 'delete'),
+    };
   }
 }

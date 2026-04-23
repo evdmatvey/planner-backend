@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Color, Priority } from '@prisma/__generated__';
 import { AnalyticsController } from './analytics.controller';
@@ -23,7 +22,6 @@ describe('AnalyticsController', () => {
             getTasksAnalytics: jest.fn(),
           },
         },
-        Logger,
       ],
     }).compile();
 

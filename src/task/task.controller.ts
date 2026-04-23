@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Logger,
   Param,
   Patch,
   Post,
@@ -15,7 +14,11 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { UseUser } from '@/auth/decorators/use-user.decorator';
-import { ApiRouteDocs } from '@/shared/swagger';
+import {
+  ApiRouteDocs,
+  BadRequestResponse,
+  badRequestResponseDescription,
+} from '@/shared/swagger';
 import { NotFoundResponse } from '@/shared/swagger-types/notfound-response';
 import {
   UnauthorizedResponse,
@@ -24,12 +27,14 @@ import {
 import { TaskMessageConstants } from './constants/task-message.constants';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskService } from './task.service';
 import {
+  TaskRouteConstants,
+  TaskSummaryConstants,
   TaskWithMessageResponse,
   TaskWithTagsAndMessageResponse,
   TaskWithTagsResponse,
-} from './types/task-response.types';
+} from './swagger';
+import { TaskService } from './task.service';
 
 @Auth()
 @ApiBearerAuth()
@@ -37,19 +42,16 @@ import {
 @UsePipes(new ValidationPipe())
 @Controller('tasks')
 export class TaskController {
-  public constructor(
-    private readonly _taskService: TaskService,
-    private readonly _logger: Logger,
-  ) {}
+  public constructor(private readonly _taskService: TaskService) {}
 
   @Get()
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение всех задач',
+    summary: TaskSummaryConstants.GET_ALL,
     apiResponses: {
       ok: {
         type: TaskWithTagsResponse,
-        description: 'Все задачи успешно получены',
+        description: TaskRouteConstants.GET_ALL.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -58,31 +60,19 @@ export class TaskController {
     },
   })
   public async getAll(@UseUser('id') userId: string) {
-    try {
-      this._logger.log(`Get all tasks for user with id: ${userId}`);
-      const tasks = await this._tryGetTasks(userId);
-      this._logger.log(
-        `Tasks for user with id: ${userId} successfully received`,
-      );
+    const tasks = await this._taskService.getAll(userId);
 
-      return { tasks };
-    } catch (error) {
-      this._logger.error(
-        `Error while getting tasks for user with id: ${userId}`,
-        error,
-      );
-      throw error;
-    }
+    return { tasks };
   }
 
   @Get(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Получение задачи по id',
+    summary: TaskSummaryConstants.GET_ONE,
     apiResponses: {
       ok: {
         type: TaskWithTagsResponse,
-        description: 'Задача успешно получена по id',
+        description: TaskRouteConstants.GET_ONE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -90,7 +80,7 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.GET_ONE.NOT_FOUND,
       },
     },
   })
@@ -98,34 +88,27 @@ export class TaskController {
     @UseUser('id') userId: string,
     @Param('id') taskId: string,
   ) {
-    try {
-      this._logger.log(
-        `Get task with id: ${taskId} for user with id: ${userId}`,
-      );
-      const task = await this._tryGetTask(userId, taskId);
-      this._logger.log(`Task with id: ${taskId} successfully received`);
+    const task = await this._taskService.getById(userId, taskId);
 
-      return { task };
-    } catch (error) {
-      this._logger.warn(
-        `Error while getting task with id: ${taskId} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return { task };
   }
 
   @Post()
   @HttpCode(201)
   @ApiRouteDocs({
-    summary: 'Создание задачи',
+    summary: TaskSummaryConstants.CREATE,
     apiResponses: {
       ok: {
         type: TaskWithTagsAndMessageResponse,
-        description: 'Задача успешно создана',
+        description: TaskRouteConstants.CREATE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
         description: unauthorizedResponseDescription,
+      },
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
       },
     },
   })
@@ -133,35 +116,22 @@ export class TaskController {
     @UseUser('id') userId: string,
     @Body() dto: CreateTaskDto,
   ) {
-    try {
-      this._logger.log(
-        `Create task for user with id: ${userId} with title: ${dto.title}`,
-      );
-      const task = await this._tryCreateTask(userId, dto);
-      this._logger.log(
-        `Task with id: ${task.id} for user with id: ${userId} successfully created`,
-      );
+    const task = await this._taskService.create(userId, dto);
 
-      return {
-        task,
-        message: TaskMessageConstants.SUCCESS_CREATE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while creating task for user with id: ${userId} with title: ${dto.title}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      task,
+      message: TaskMessageConstants.SUCCESS_CREATE,
+    };
   }
 
   @Put(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Обновление задачи',
+    summary: TaskSummaryConstants.UPDATE,
     apiResponses: {
       ok: {
         type: TaskWithTagsAndMessageResponse,
-        description: 'Задача успешно обновлена',
+        description: TaskRouteConstants.UPDATE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -169,7 +139,11 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.UPDATE.NOT_FOUND,
+      },
+      badRequest: {
+        type: BadRequestResponse,
+        description: badRequestResponseDescription,
       },
     },
   })
@@ -178,35 +152,22 @@ export class TaskController {
     @Param('id') taskId: string,
     @Body() dto: UpdateTaskDto,
   ) {
-    try {
-      this._logger.log(
-        `Update task with id: ${taskId} for user with id: ${userId} with title: ${dto.title}`,
-      );
-      const task = await this._tryUpdateTask(userId, taskId, dto);
-      this._logger.log(
-        `Task with id: ${taskId} for user with id: ${userId} successfully updated`,
-      );
+    const task = await this._taskService.update(userId, taskId, dto);
 
-      return {
-        task,
-        message: TaskMessageConstants.SUCCESS_UPDATE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while updating task with id: ${taskId} for user with id: ${userId} with title: ${dto.title}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      task,
+      message: TaskMessageConstants.SUCCESS_UPDATE,
+    };
   }
 
   @Patch(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Переключение задача выполнена/не выполнена',
+    summary: TaskSummaryConstants.TOGGLE_COMPLETE,
     apiResponses: {
       ok: {
         type: TaskWithMessageResponse,
-        description: 'Статус задачи успешно переключен',
+        description: TaskRouteConstants.TOGGLE_COMPLETE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -214,7 +175,7 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.TOGGLE_COMPLETE.NOT_FOUND,
       },
     },
   })
@@ -222,37 +183,24 @@ export class TaskController {
     @UseUser('id') userId: string,
     @Param('id') taskId: string,
   ) {
-    try {
-      this._logger.log(
-        `Toggle complete task with id: ${taskId} for user with id: ${userId}`,
-      );
-      const task = await this._tryToggleComplete(userId, taskId);
-      this._logger.log(
-        `Task with id: ${taskId} for user with id: ${userId} successfully toggled`,
-      );
+    const task = await this._taskService.toggleIsCompleted(userId, taskId);
 
-      return {
-        task,
-        message: task.isCompleted
-          ? TaskMessageConstants.TASK_COMPLETED
-          : TaskMessageConstants.TASK_UNCOMPLETED,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while toggling task with id: ${taskId} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
+    return {
+      task,
+      message: task.isCompleted
+        ? TaskMessageConstants.TASK_COMPLETED
+        : TaskMessageConstants.TASK_UNCOMPLETED,
+    };
   }
 
   @Delete(':id')
   @HttpCode(200)
   @ApiRouteDocs({
-    summary: 'Удаление задачи',
+    summary: TaskSummaryConstants.DELETE,
     apiResponses: {
       ok: {
         type: TaskWithMessageResponse,
-        description: 'Задача успешно удалена',
+        description: TaskRouteConstants.DELETE.OK,
       },
       unauthorized: {
         type: UnauthorizedResponse,
@@ -260,7 +208,7 @@ export class TaskController {
       },
       notFound: {
         type: NotFoundResponse,
-        description: 'Задача не найдена по переданному id',
+        description: TaskRouteConstants.DELETE.NOT_FOUND,
       },
     },
   })
@@ -268,64 +216,11 @@ export class TaskController {
     @UseUser('id') userId: string,
     @Param('id') taskId: string,
   ) {
-    try {
-      this._logger.log(
-        `Delete task with id: ${taskId} for user with id: ${userId}`,
-      );
-      const task = await this._tryDeleteTask(userId, taskId);
-      this._logger.log(
-        `Task with id: ${taskId} for user with id: ${userId} successfully deleted`,
-      );
-
-      return {
-        task,
-        message: TaskMessageConstants.SUCCESS_DELETE,
-      };
-    } catch (error) {
-      this._logger.warn(
-        `Error while deleting task with id: ${taskId} for user with id: ${userId}. Error message: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  private async _tryGetTasks(userId: string) {
-    const tasks = await this._taskService.getAll(userId);
-
-    return tasks;
-  }
-
-  private async _tryGetTask(userId: string, taskId: string) {
-    const task = await this._taskService.getById(userId, taskId);
-
-    return task;
-  }
-
-  private async _tryCreateTask(userId: string, dto: CreateTaskDto) {
-    const task = await this._taskService.create(userId, dto);
-
-    return task;
-  }
-
-  private async _tryUpdateTask(
-    userId: string,
-    taskId: string,
-    dto: UpdateTaskDto,
-  ) {
-    const task = await this._taskService.update(userId, taskId, dto);
-
-    return task;
-  }
-
-  private async _tryToggleComplete(userId: string, taskId: string) {
-    const task = await this._taskService.toggleIsCompleted(userId, taskId);
-
-    return task;
-  }
-
-  private async _tryDeleteTask(userId: string, taskId: string) {
     const task = await this._taskService.delete(userId, taskId);
 
-    return task;
+    return {
+      task,
+      message: TaskMessageConstants.SUCCESS_DELETE,
+    };
   }
 }

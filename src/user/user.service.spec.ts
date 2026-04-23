@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/__generated__';
 import * as argon2 from 'argon2';
-import { mockPrismaService } from '@/shared/mocks/prisma-service.mock';
 import { PrismaService } from '@/shared/services/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,9 +8,20 @@ import { UserService } from './user.service';
 
 jest.mock('argon2');
 
+const mockUserPrismaService = {
+  user: {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findFirst: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+};
+
 describe('UserService', () => {
   let service: UserService;
-  let prismaService: typeof mockPrismaService;
+  let prismaService: typeof mockUserPrismaService;
   let userId: string;
   let user: User;
 
@@ -19,12 +29,12 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: PrismaService, useValue: mockUserPrismaService },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
-    prismaService = module.get<typeof mockPrismaService>(PrismaService);
+    prismaService = module.get<typeof mockUserPrismaService>(PrismaService);
     userId = 'user-id';
     user = {
       id: userId,

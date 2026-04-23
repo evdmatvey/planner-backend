@@ -1,18 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { TurnstileModule } from 'nestjs-cloudflare-captcha';
 import { AnalyticsModule } from './analytics';
 import { AuthModule } from './auth';
 import { FinancesModule } from './finances/finances.module';
-import { HttpMetricsInterceptor } from './metrics/interceptors/http-metrics.interceptor';
-import { MetricsModule } from './metrics/metrics.module';
 import { TagModule } from './tag';
 import { TaskModule } from './task';
 import { UserModule } from './user';
 
-// TODO: remove Prometheus metrics (#24)
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,20 +20,12 @@ import { UserModule } from './user';
         process.env.NODE_ENV === 'development' ||
         process.env.NODE_ENV === 'test',
     }),
-    PrometheusModule.register(),
     UserModule,
     AuthModule,
     TaskModule,
     TagModule,
     AnalyticsModule,
     FinancesModule,
-    MetricsModule,
-  ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpMetricsInterceptor,
-    },
   ],
 })
 export class AppModule {}

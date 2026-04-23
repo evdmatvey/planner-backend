@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/__generated__';
 import { UserMessageConstants } from './constants/user-message.constants';
@@ -24,7 +23,6 @@ describe('UserController', () => {
           provide: UserService,
           useValue: mockUserService,
         },
-        Logger,
       ],
     }).compile();
 

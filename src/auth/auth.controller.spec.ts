@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -41,7 +40,6 @@ describe('AuthController', () => {
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: TokenService, useValue: mockTokenService },
-        Logger,
       ],
     }).compile();
 

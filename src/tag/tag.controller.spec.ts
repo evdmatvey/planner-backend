@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Color, Tag } from '@prisma/__generated__';
 import { TagMessageConstants } from './constants/tag-message.constants';
@@ -32,7 +31,6 @@ describe('TagController', () => {
           provide: TagService,
           useValue: mockTagService,
         },
-        Logger,
       ],
     }).compile();
 

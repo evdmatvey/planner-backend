@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Priority, Task } from '@prisma/__generated__';
 import { TaskMessageConstants } from './constants/task-message.constants';
@@ -32,7 +31,6 @@ describe('TaskController', () => {
           provide: TaskService,
           useValue: mockTaskService,
         },
-        Logger,
       ],
     }).compile();
 
